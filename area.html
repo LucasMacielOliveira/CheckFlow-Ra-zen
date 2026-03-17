@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>CheckFlow - Áreas</title>
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Ícones -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+  <div class="page">
+    <div class="card">
+      <div class="logo">CheckFlow</div>
+      <div class="subtitle">Selecione a área</div>
+
+      <div class="button-row">
+
+        <button class="area-button" onclick="entrarMobilidade()">
+          <i class="fa-solid fa-truck"></i>
+          Mobilidade
+        </button>
+
+      </div>
+
+      <div class="footer-brand">raizen</div>
+    </div>
+  </div>
+
+  <script>
+    function entrarMobilidade() {
+      localStorage.setItem("areaSelecionada", "Mobilidade");
+      window.location.href = "processo.html";
+    }
+  </script>
+</body>
+</html>
