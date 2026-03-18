@@ -84,7 +84,46 @@
 
   <script src="filtros.js"></script>
   <script>
+  function verificarAcessoFilial() {
+    const usuario = localStorage.getItem("usuarioLogado");
+    const area = localStorage.getItem("areaSelecionada");
+    const processo = localStorage.getItem("processoSelecionado");
+    const estados = localStorage.getItem("estadosSelecionados");
+
+    if (!usuario || usuario.trim() === "") {
+      alert("Você precisa fazer login para acessar esta página.");
+      window.location.href = "index.html";
+      return false;
+    }
+
+    if (!area || area.trim() === "") {
+      alert("Selecione a área antes de continuar.");
+      window.location.href = "area.html";
+      return false;
+    }
+
+    if (!processo || processo.trim() === "") {
+      alert("Selecione o processo antes de continuar.");
+      window.location.href = "processo.html";
+      return false;
+    }
+
+    if (!estados || estados === "[]" || estados.trim() === "") {
+      alert("Selecione pelo menos um estado antes de continuar.");
+      window.location.href = "estado.html";
+      return false;
+    }
+
+    return true;
+  }
+
   function continuar() {
+    const acessoPermitido = verificarAcessoFilial();
+
+    if (!acessoPermitido) {
+      return;
+    }
+
     const filiais = obterSelecionados("filial-checkbox");
     const competencia = document.getElementById("competencia").value;
 
@@ -100,9 +139,10 @@
 
     localStorage.setItem("filiaisSelecionadas", JSON.stringify(filiais));
     localStorage.setItem("competenciaSelecionada", competencia);
-
     window.location.href = "checklist.html";
   }
+
+  verificarAcessoFilial();
 </script>
 </body>
 </html>
