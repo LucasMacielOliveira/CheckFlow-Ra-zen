@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>CheckFlow - Seleção</title>
+  <title>CheckFlow - Filtros</title>
   <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
@@ -12,7 +12,7 @@
         <img src="../assets/CheckFlowLogo.png" alt="CheckFlow">
       </div>
 
-      <div class="subtitle">Selecione os parâmetros</div>
+      <div class="subtitle">Selecione os filtros</div>
 
       <div class="subtitle">Competência</div>
       <input class="input" type="month" id="competencia">
@@ -75,33 +75,24 @@
     function limparSelecaoFiliais() {
       document.getElementById("listaFiliais").innerHTML = "";
       document.getElementById("previewFiliais").innerHTML = "Nenhum item selecionado.";
-
-      const campoBuscaFilial = document.getElementById("searchFiliais");
-      if (campoBuscaFilial) {
-        campoBuscaFilial.value = "";
-      }
-
+      document.getElementById("searchFiliais").value = "";
       salvarLista("filiaisSelecionadas", []);
     }
 
     function mostrarOuOcultarFilial() {
-  const processo = lerTexto("processoSelecionado");
-  const config = processosConfig[processo];
-  const blocoFiliais = document.getElementById("blocoFiliais");
-  const grid = document.getElementById("selectionGrid");
+      const processo = lerTexto("processoSelecionado");
+      const blocoFiliais = document.getElementById("blocoFiliais");
+      const grid = document.getElementById("selectionGrid");
 
-  console.log("Processo salvo:", processo);
-  console.log("Config encontrada:", config);
-
-  if (config && config.usaFilial) {
-    blocoFiliais.classList.remove("hidden");
-    grid.classList.remove("single-column");
-  } else {
-    blocoFiliais.classList.add("hidden");
-    grid.classList.add("single-column");
-    limparSelecaoFiliais();
-  }
-}
+      if (processo === "Apuração" || processo === "SCANC") {
+        blocoFiliais.style.display = "block";
+        grid.classList.remove("single-column");
+      } else {
+        blocoFiliais.style.display = "none";
+        grid.classList.add("single-column");
+        limparSelecaoFiliais();
+      }
+    }
 
     async function carregarEstados() {
       try {
@@ -127,44 +118,33 @@
 
         await carregarFiliaisSeNecessario();
       } catch (erro) {
+        console.error("Erro ao carregar estados:", erro);
         alert("Não foi possível carregar os estados.");
-        console.error(erro);
       }
     }
 
     function restaurarEstadosSalvos() {
       const estadosSalvos = lerLista("estadosSelecionados");
-
-      if (!estadosSalvos.length) {
-        return;
-      }
-
       const checkboxes = document.querySelectorAll(".estado-checkbox");
 
-      checkboxes.forEach(function (checkbox) {
+      checkboxes.forEach(function(checkbox) {
         checkbox.checked = estadosSalvos.includes(checkbox.value);
       });
     }
 
     function restaurarFiliaisSalvas() {
       const filiaisSalvas = lerLista("filiaisSelecionadas");
-
-      if (!filiaisSalvas.length) {
-        return;
-      }
-
       const checkboxes = document.querySelectorAll(".filial-checkbox");
 
-      checkboxes.forEach(function (checkbox) {
+      checkboxes.forEach(function(checkbox) {
         checkbox.checked = filiaisSalvas.includes(checkbox.value);
       });
     }
 
     async function carregarFiliaisSeNecessario() {
       const processo = lerTexto("processoSelecionado");
-      const config = processosConfig[processo];
 
-      if (!config || !config.usaFilial) {
+      if (!(processo === "Apuração" || processo === "SCANC")) {
         return;
       }
 
@@ -181,7 +161,7 @@
         for (const estado of estadosSelecionados) {
           const filiaisDoEstado = await buscarFiliaisPorEstado(estado);
 
-          filiaisDoEstado.forEach(function (filial) {
+          filiaisDoEstado.forEach(function(filial) {
             if (!filiais.includes(filial)) {
               filiais.push(filial);
             }
@@ -208,8 +188,8 @@
           "selecionarTodosFiliais"
         );
       } catch (erro) {
+        console.error("Erro ao carregar filiais:", erro);
         alert("Não foi possível carregar as filiais.");
-        console.error(erro);
       }
     }
 
@@ -220,8 +200,8 @@
       await carregarFiliaisSeNecessario();
     }
 
-    function ativarEventoEstados() {
-      document.addEventListener("change", async function (event) {
+    function ativarEventos() {
+      document.addEventListener("change", async function(event) {
         if (event.target.classList.contains("estado-checkbox")) {
           atualizarPreview(
             "estado-checkbox",
@@ -233,7 +213,7 @@
         }
 
         if (event.target.id === "selecionarTodosEstados") {
-          setTimeout(async function () {
+          setTimeout(async function() {
             const estadosSelecionados = obterSelecionados("estado-checkbox");
             salvarLista("estadosSelecionados", estadosSelecionados);
             salvarLista("filiaisSelecionadas", []);
@@ -249,12 +229,11 @@
             "selecionarTodosFiliais"
           );
 
-          const filiaisSelecionadas = obterSelecionados("filial-checkbox");
-          salvarLista("filiaisSelecionadas", filiaisSelecionadas);
+          salvarLista("filiaisSelecionadas", obterSelecionados("filial-checkbox"));
         }
 
         if (event.target.id === "selecionarTodosFiliais") {
-          setTimeout(function () {
+          setTimeout(function() {
             atualizarPreview(
               "filial-checkbox",
               "previewFiliais",
@@ -262,8 +241,7 @@
               "selecionarTodosFiliais"
             );
 
-            const filiaisSelecionadas = obterSelecionados("filial-checkbox");
-            salvarLista("filiaisSelecionadas", filiaisSelecionadas);
+            salvarLista("filiaisSelecionadas", obterSelecionados("filial-checkbox"));
           }, 0);
         }
       });
@@ -271,7 +249,6 @@
 
     function carregarCompetenciaSalva() {
       const competenciaSalva = lerTexto("competenciaSelecionada");
-
       if (competenciaSalva) {
         document.getElementById("competencia").value = competenciaSalva;
       }
@@ -279,7 +256,6 @@
 
     function continuar() {
       const processo = lerTexto("processoSelecionado");
-      const config = processosConfig[processo];
       const estados = obterSelecionados("estado-checkbox");
       const competencia = document.getElementById("competencia").value;
 
@@ -296,7 +272,7 @@
       salvarLista("estadosSelecionados", estados);
       salvarTexto("competenciaSelecionada", competencia);
 
-      if (config && config.usaFilial) {
+      if (processo === "Apuração" || processo === "SCANC") {
         const filiais = obterSelecionados("filial-checkbox");
 
         if (filiais.length === 0) {
@@ -315,7 +291,7 @@
     if (exigirLogin() && exigirArea() && exigirProcesso()) {
       mostrarOuOcultarFilial();
       carregarCompetenciaSalva();
-      ativarEventoEstados();
+      ativarEventos();
       carregarEstados();
     }
   </script>

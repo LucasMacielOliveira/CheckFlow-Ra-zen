@@ -46,7 +46,11 @@ function atualizarPreview(checkboxClass, previewId, previewLabel, masterId) {
 
   if (masterId) {
     const total = document.querySelectorAll("." + checkboxClass).length;
-    document.getElementById(masterId).checked = selecionados.length === total && total > 0;
+    const master = document.getElementById(masterId);
+
+    if (master) {
+      master.checked = selecionados.length === total && total > 0;
+    }
   }
 }
 
@@ -63,6 +67,10 @@ function obterSelecionados(checkboxClass) {
 
 function renderizarOpcoes(containerId, items, checkboxClass, optionClass, previewId, previewLabel, masterId) {
   const container = document.getElementById(containerId);
+
+  if (!container) {
+    return;
+  }
 
   let html = `
     <label class="option-item">
