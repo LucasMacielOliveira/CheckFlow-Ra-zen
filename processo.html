@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>CheckFlow - Processo</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="page">
+    <div class="card">
+      <div class="logo">CheckFlow</div>
+      <div class="subtitle">Selecione um processo</div>
+
+      <div class="button-row">
+        <button class="secondary-button" onclick="selecionarProcesso('Apuração')">Apuração</button>
+        <button class="secondary-button" onclick="selecionarProcesso('SPED')">SPED</button>
+        <button class="secondary-button" onclick="selecionarProcesso('SCANC')">SCANC</button>
+      </div>
+
+      <div class="footer-brand">raizen</div>
+    </div>
+  </div>
+
+  <script>
+    function selecionarProcesso(processo) {
+      localStorage.setItem("processoSelecionado", processo);
+      localStorage.removeItem("estadosSelecionados");
+      localStorage.removeItem("filiaisSelecionadas");
+      window.location.href = "estado.html";
+    }
+  </script>
+</body>
+</html>
