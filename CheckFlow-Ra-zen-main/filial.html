@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>CheckFlow - Filiais</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="page">
+    <div class="card">
+      <div class="logo">CheckFlow</div>
+      <div class="subtitle">Selecione as Filiais</div>
+      <div class="subtitle">competencia</div>
+      <input class="input" type="month" id="competencia">
+      <div class="multi-select-box">
+        <input
+          type="text"
+          id="searchFiliais"
+          class="search-input"
+          placeholder="Pesquisar filial..."
+          onkeyup="filtrarOpcoes('searchFiliais', 'opcao-filial')"
+        >
+
+        <div class="options-box">
+          <label class="option-item">
+            <input
+              type="checkbox"
+              id="selecionarTodosFiliais"
+              onclick="toggleSelecionarTodos('selecionarTodosFiliais', 'filial-checkbox', 'previewFiliais', 'Filiais selecionadas')"
+            >
+            Selecionar todos
+          </label>
+
+          <label class="option-item opcao-filial">
+            <input
+              type="checkbox"
+              class="filial-checkbox"
+              value="Paulínia"
+              onchange="atualizarPreview('filial-checkbox', 'previewFiliais', 'Filiais selecionadas', 'selecionarTodosFiliais')"
+            >
+            Paulínia
+          </label>
+
+          <label class="option-item opcao-filial">
+            <input
+              type="checkbox"
+              class="filial-checkbox"
+              value="Campinas"
+              onchange="atualizarPreview('filial-checkbox', 'previewFiliais', 'Filiais selecionadas', 'selecionarTodosFiliais')"
+            >
+            Campinas
+          </label>
+
+          <label class="option-item opcao-filial">
+            <input
+              type="checkbox"
+              class="filial-checkbox"
+              value="Ribeirão Preto"
+              onchange="atualizarPreview('filial-checkbox', 'previewFiliais', 'Filiais selecionadas', 'selecionarTodosFiliais')"
+            >
+            Ribeirão Preto
+          </label>
+
+          <label class="option-item opcao-filial">
+            <input
+              type="checkbox"
+              class="filial-checkbox"
+              value="Santos"
+              onchange="atualizarPreview('filial-checkbox', 'previewFiliais', 'Filiais selecionadas', 'selecionarTodosFiliais')"
+            >
+            Santos
+          </label>
+        </div>
+      </div>
+
+      <div class="selected-preview" id="previewFiliais">
+        Nenhum item selecionado.
+      </div>
+
+      <button class="button button-fixed" onclick="continuar()">Continuar</button>
+
+      <div class="footer-brand">raizen</div>
+    </div>
+  </div>
+
+  <script src="filtros.js"></script>
+  <script>
+  function verificarAcessoFilial() {
+    const usuario = localStorage.getItem("usuarioLogado");
+    const area = localStorage.getItem("areaSelecionada");
+    const processo = localStorage.getItem("processoSelecionado");
+    const estados = localStorage.getItem("estadosSelecionados");
+
+    if (!usuario || usuario.trim() === "") {
+      alert("Você precisa fazer login para acessar esta página.");
+      window.location.href = "index.html";
+      return false;
+    }
+
+    if (!area || area.trim() === "") {
+      alert("Selecione a área antes de continuar.");
+      window.location.href = "area.html";
+      return false;
+    }
+
+    if (!processo || processo.trim() === "") {
+      alert("Selecione o processo antes de continuar.");
+      window.location.href = "processo.html";
+      return false;
+    }
+
+    if (!estados || estados === "[]" || estados.trim() === "") {
+      alert("Selecione pelo menos um estado antes de continuar.");
+      window.location.href = "estado.html";
+      return false;
+    }
+
+    return true;
+  }
+
+  function continuar() {
+    const acessoPermitido = verificarAcessoFilial();
+
+    if (!acessoPermitido) {
+      return;
+    }
+
+    const filiais = obterSelecionados("filial-checkbox");
+    const competencia = document.getElementById("competencia").value;
+
+    if (filiais.length === 0) {
+      alert("Selecione pelo menos uma filial.");
+      return;
+    }
+
+    if (!competencia) {
+      alert("Selecione a competência.");
+      return;
+    }
+
+    localStorage.setItem("filiaisSelecionadas", JSON.stringify(filiais));
+    localStorage.setItem("competenciaSelecionada", competencia);
+    window.location.href = "checklist.html";
+  }
+
+  verificarAcessoFilial();
+</script>
+</body>
+</html>

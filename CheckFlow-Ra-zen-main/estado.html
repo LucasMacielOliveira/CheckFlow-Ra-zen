@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>CheckFlow - Estados</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="page">
+    <div class="card">
+      <div class="logo">CheckFlow</div>
+      <div class="subtitle">Selecione os Estados</div>
+      <div class="subtitle">Competência</div>
+      <input class="input" type="month" id="competencia">
+
+      <div class="multi-select-box">
+        <input
+          type="text"
+          id="searchEstados"
+          class="search-input"
+          placeholder="Pesquisar estado..."
+          onkeyup="filtrarOpcoes('searchEstados', 'opcao-estado')"
+        >
+
+        <div class="options-box">
+          <label class="option-item">
+            <input
+              type="checkbox"
+              id="selecionarTodosEstados"
+              onclick="toggleSelecionarTodos('selecionarTodosEstados', 'estado-checkbox', 'previewEstados', 'Estados selecionados')"
+            >
+            Selecionar todos
+          </label>
+
+          <label class="option-item opcao-estado">
+            <input
+              type="checkbox"
+              class="estado-checkbox"
+              value="São Paulo"
+              onchange="atualizarPreview('estado-checkbox', 'previewEstados', 'Estados selecionados', 'selecionarTodosEstados')"
+            >
+            São Paulo
+          </label>
+
+          <label class="option-item opcao-estado">
+            <input
+              type="checkbox"
+              class="estado-checkbox"
+              value="Minas Gerais"
+              onchange="atualizarPreview('estado-checkbox', 'previewEstados', 'Estados selecionados', 'selecionarTodosEstados')"
+            >
+            Minas Gerais
+          </label>
+
+          <label class="option-item opcao-estado">
+            <input
+              type="checkbox"
+              class="estado-checkbox"
+              value="Paraná"
+              onchange="atualizarPreview('estado-checkbox', 'previewEstados', 'Estados selecionados', 'selecionarTodosEstados')"
+            >
+            Paraná
+          </label>
+
+          <label class="option-item opcao-estado">
+            <input
+              type="checkbox"
+              class="estado-checkbox"
+              value="Rio de Janeiro"
+              onchange="atualizarPreview('estado-checkbox', 'previewEstados', 'Estados selecionados', 'selecionarTodosEstados')"
+            >
+            Rio de Janeiro
+          </label>
+        </div>
+      </div>
+
+      <div class="selected-preview" id="previewEstados">
+        Nenhum item selecionado.
+      </div>
+
+      <button class="button button-fixed" onclick="continuar()">Continuar</button>
+
+      <div class="footer-brand">raizen</div>
+    </div>
+  </div>
+
+  <script src="filtros.js"></script>
+ <script>
+  function verificarAcessoEstado() {
+    const usuario = localStorage.getItem("usuarioLogado");
+    const area = localStorage.getItem("areaSelecionada");
+    const processo = localStorage.getItem("processoSelecionado");
+
+    if (!usuario || usuario.trim() === "") {
+      alert("Você precisa fazer login para acessar esta página.");
+      window.location.href = "index.html";
+      return false;
+    }
+
+    if (!area || area.trim() === "") {
+      alert("Selecione a área antes de continuar.");
+      window.location.href = "area.html";
+      return false;
+    }
+
+    if (!processo || processo.trim() === "") {
+      alert("Selecione o processo antes de continuar.");
+      window.location.href = "processo.html";
+      return false;
+    }
+
+    return true;
+  }
+
+  function continuar() {
+    const acessoPermitido = verificarAcessoEstado();
+
+    if (!acessoPermitido) {
+      return;
+    }
+
+    const estados = obterSelecionados("estado-checkbox");
+    const competencia = document.getElementById("competencia").value;
+
+    if (estados.length === 0) {
+      alert("Selecione pelo menos um estado.");
+      return;
+    }
+
+    if (!competencia) {
+      alert("Selecione a competência.");
+      return;
+    }
+
+    localStorage.setItem("estadosSelecionados", JSON.stringify(estados));
+    localStorage.setItem("competenciaSelecionada", competencia);
+    localStorage.removeItem("filiaisSelecionadas");
+
+    const processo = localStorage.getItem("processoSelecionado");
+
+    if (processo === "SPED") {
+      window.location.href = "checklist.html";
+    } else {
+      window.location.href = "filial.html";
+    }
+  }
+
+  verificarAcessoEstado();
+</script>
+</body>
+</html>
