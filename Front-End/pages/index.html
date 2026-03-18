@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>CheckFlow - Login</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <div class="page">
+    <div class="card">
+      <div class="logo">CheckFlow</div>
+      <div class="subtitle">Acesso ao sistema</div>
+
+      <input class="input" type="text" id="usuario" placeholder="Usuário Corporativo">
+      <input class="input" type="password" id="senha" placeholder="Senha">
+      <button class="button" onclick="entrar()">Entrar</button>
+
+      <div class="footer-brand">raizen</div>
+    </div>
+  </div>
+
+  <script src="../js/storage.js"></script>
+  <script>
+    function entrar() {
+      const usuario = document.getElementById("usuario").value.trim();
+      const senha = document.getElementById("senha").value.trim();
+
+      if (!usuario) {
+        alert("Digite o usuário.");
+        return;
+      }
+
+      if (!senha) {
+        alert("Digite a senha.");
+        return;
+      }
+
+      salvarTexto("usuarioLogado", usuario);
+      window.location.href = "area.html";
+    }
+  </script>
+</body>
+</html>

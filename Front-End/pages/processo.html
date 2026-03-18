@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>CheckFlow - Processo</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <div class="page">
+    <div class="card">
+      <div class="logo">CheckFlow</div>
+      <div class="subtitle">Selecione um processo</div>
+
+      <div class="button-row">
+        <button class="secondary-button" onclick="selecionarProcesso('Apuração')">Apuração</button>
+        <button class="secondary-button" onclick="selecionarProcesso('SPED')">SPED</button>
+        <button class="secondary-button" onclick="selecionarProcesso('SCANC')">SCANC</button>
+      </div>
+
+      <div class="footer-brand">raizen</div>
+    </div>
+  </div>
+
+  <script src="../JS/storage.js"></script>
+  <script src="../JS/auth.js"></script>
+  <script src="../JS/processos.js"></script>
+  <script>
+    function selecionarProcesso(processo) {
+      if (!exigirLogin() || !exigirArea()) {
+        return;
+      }
+
+      limparFluxo();
+      salvarTexto("processoSelecionado", processo);
+
+      const config = processosConfig[processo];
+
+      if (!config) {
+        alert("Processo inválido.");
+        return;
+      }
+
+      if (config.usaEstado) {
+        window.location.href = "estado.html";
+        return;
+      }
+
+      window.location.href = "checklist.html";
+    }
+
+    exigirLogin();
+    exigirArea();
+  </script>
+</body>
+</html>

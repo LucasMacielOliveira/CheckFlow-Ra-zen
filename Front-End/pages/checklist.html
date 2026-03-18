@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>CheckFlow - Checklist</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <div class="page">
+    <div class="card">
+      <div class="logo">CheckFlow</div>
+      <div class="subtitle">Checklist</div>
+
+      <div class="info-text"><strong>Processo:</strong> <span id="processoTexto">-</span></div>
+      <div class="info-text"><strong id="labelLocal">Filial:</strong> <span id="valorLocal">-</span></div>
+      <div class="info-text"><strong>Analista:</strong> <span id="analistaTexto">-</span></div>
+      <div class="info-text"><strong>Competência:</strong> <span id="competenciaTexto">-</span></div>
+
+      <div class="checklist-box" id="checklistBox"></div>
+
+      <button class="button button-fixed" onclick="validarChecklist()">Salvar</button>
+
+      <div class="footer-brand">raizen</div>
+    </div>
+  </div>
+
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <h3>Atenção</h3>
+      <p>É necessário dar check em todas as atividades.</p>
+      <button onclick="fecharModal()">Fechar</button>
+    </div>
+  </div>
+
+  <div id="modalSucesso" class="modal">
+    <div class="modal-content sucesso">
+      <h3>Sucesso</h3>
+      <p>Checklist salvo com sucesso!</p>
+      <button onclick="fecharModalSucesso()">OK</button>
+    </div>
+  </div>
+
+  <script src="../JS/storage.js"></script>
+  <script src="../JS/auth.js"></script>
+  <script src="../JS/tarefas.js"></script>
+  <script>
+    function toggleInstruction(id) {
+      const box = document.getElementById(id);
+      box.style.display = box.style.display === "block" ? "none" : "block";
+    }
+
+    function validarChecklist() {
+      const checkboxes = document.querySelectorAll(".task-checkbox");
+      let todosMarcados = true;
+
+      checkboxes.forEach(function(checkbox) {
+        if (!checkbox.checked) {
+          todosMarcados = false;
+        }
+      });
+
+      if (!todosMarcados) {
+        document.getElementById("modal").style.display = "flex";
+        return;
+      }
+
+      document.getElementById("modalSucesso").style.display = "flex";
+    }
+
+    function fecharModal() {
+      document.getElementById("modal").style.display = "none";
+    }
+
+    function fecharModalSucesso() {
+      document.getElementById("modalSucesso").style.display = "none";
+    }
+
+    function formatarCompetencia(valor) {
+      if (!valor || !valor.includes("-")) {
+        return "-";
+      }
+
+      const [ano, mes] = valor.split("-");
+      const meses = [
+        "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+        "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+      ];
+
+      return meses[parseInt(mes, 10) - 1] + " " + ano;
+    }
+
+    function carregarResumo() {
+      const processo = lerTexto("processoSelecionado");
+      const estados = lerLista("estadosSelecionados");
+      const filiais = lerLista("filiaisSelecionadas");
+      const usuario = lerTexto("usuarioLogado");
+      const competencia = lerTexto("competenciaSelecionada");
+
+      document.getElementById("processoTexto").textContent = processo || "-";
+      document.getElementById("analistaTexto").textContent = usuario || "-";
+      document.getElementById("competenciaTexto").textContent = formatarCompetencia(competencia);
+
+      const labelLocal = document.getElementById("labelLocal");
+      const valorLocal = document.getElementById("valorLocal");
+
+      if (processo === "SPED") {
+        labelLocal.textContent = "Estados:";
+        valorLocal.textContent = estados.length ? estados.join(", ") : "-";
+      } else {
+        labelLocal.textContent = "Filiais:";
+        valorLocal.textContent = filiais.length ? filiais.join(", ") : "-";
+      }
+    }
+
+    function renderizarChecklist() {
+      const processo = lerTexto("processoSelecionado");
+      const estados = lerLista("estadosSelecionados");
+      const filiais = lerLista("filiaisSelecionadas");
+      const checklistBox = document.getElementById("checklistBox");
+
+      const tarefas = montarTarefasChecklist(processo, estados, filiais);
+
+      checklistBox.innerHTML = "";
+
+      tarefas.forEach(function(tarefa, index) {
+        const instructionId = "instrucao" + index;
+        const passosHtml = tarefa.instrucao
+          .map(function(passo, i) {
+            return (i + 1) + ". " + passo;
+          })
+          .join("<br>");
+
+        const taskHtml = `
+          <div class="task">
+            <div class="task-top">
+              <div class="task-left">
+                <input type="checkbox" class="task-checkbox">
+                <span class="task-title">${tarefa.titulo}</span>
+              </div>
+              <button class="instruction-button" onclick="toggleInstruction('${instructionId}')">
+                Ver instrução
+              </button>
+            </div>
+            <div class="instruction-box" id="${instructionId}">
+              ${passosHtml}
+            </div>
+          </div>
+        `;
+
+        checklistBox.innerHTML += taskHtml;
+      });
+    }
+
+    if (exigirLogin() && exigirArea() && exigirProcesso()) {
+      carregarResumo();
+      renderizarChecklist();
+    }
+  </script>
+</body>
+</html>

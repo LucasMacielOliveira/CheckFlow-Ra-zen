@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>CheckFlow - Estados</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <div class="page">
+    <div class="card">
+      <div class="logo">CheckFlow</div>
+      <div class="subtitle">Selecione os Estados</div>
+      <div class="subtitle">Competência</div>
+
+      <input class="input" type="month" id="competencia">
+
+      <div class="multi-select-box">
+        <input
+          type="text"
+          id="searchEstados"
+          class="search-input"
+          placeholder="Pesquisar estado..."
+          onkeyup="filtrarOpcoes('searchEstados', 'opcao-estado')"
+        >
+
+        <div class="options-box" id="listaEstados"></div>
+      </div>
+
+      <div class="selected-preview" id="previewEstados">
+        Nenhum item selecionado.
+      </div>
+
+      <button class="button button-fixed" onclick="continuar()">Continuar</button>
+
+      <div class="footer-brand">raizen</div>
+    </div>
+  </div>
+
+  <script src="../JS/storage.js"></script>
+  <script src="../JS/auth.js"></script>
+  <script src="../JS/processos.js"></script>
+  <script src="../JS/locais.js"></script>
+  <script src="../JS/filtros.js"></script>
+  <script>
+    function carregarEstados() {
+      const estados = obterEstados();
+
+      renderizarOpcoes(
+        "listaEstados",
+        estados,
+        "estado-checkbox",
+        "opcao-estado",
+        "previewEstados",
+        "Estados selecionados",
+        "selecionarTodosEstados"
+      );
+    }
+
+    function continuar() {
+      const estados = obterSelecionados("estado-checkbox");
+      const competencia = document.getElementById("competencia").value;
+      const processo = lerTexto("processoSelecionado");
+
+      if (estados.length === 0) {
+        alert("Selecione pelo menos um estado.");
+        return;
+      }
+
+      if (!competencia) {
+        alert("Selecione a competência.");
+        return;
+      }
+
+      salvarLista("estadosSelecionados", estados);
+      salvarTexto("competenciaSelecionada", competencia);
+
+      const config = processosConfig[processo];
+
+      if (!config) {
+        alert("Processo inválido.");
+        return;
+      }
+
+      if (config.usaFilial) {
+        window.location.href = "filial.html";
+      } else {
+        window.location.href = "checklist.html";
+      }
+    }
+
+    if (exigirLogin() && exigirArea() && exigirProcesso()) {
+      carregarEstados();
+    }
+  </script>
+</body>
+</html>
