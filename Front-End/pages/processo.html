@@ -18,6 +18,7 @@
         <button class="secondary-button" onclick="selecionarProcesso('Apuração')">Apuração</button>
         <button class="secondary-button" onclick="selecionarProcesso('SPED')">SPED</button>
         <button class="secondary-button" onclick="selecionarProcesso('SCANC')">SCANC</button>
+        <button class="history-nav-button" onclick="irParaHistorico()">Ver histórico</button>
       </div>
 
       <div class="footer-brand">
@@ -46,6 +47,14 @@
       }
 
       window.location.href = "filtros.html";
+    }
+
+    function irParaHistorico() {
+      if (!exigirLogin() || !exigirArea()) {
+        return;
+      }
+
+      window.location.href = "historico.html";
     }
 
     exigirLogin();

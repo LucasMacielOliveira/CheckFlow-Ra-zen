@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>CheckFlow - Histórico</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <div class="page">
+    <div class="card card-history">
+      <div class="logo">
+        <img src="../assets/checkflow-logo.png" alt="CheckFlow">
+      </div>
+
+      <div class="history-header">
+        <div class="subtitle no-margin">Histórico de Checklists</div>
+        <p class="history-description">
+          Consulte os checklists finalizados e remova registros quando necessário.
+        </p>
+      </div>
+
+      <div class="history-actions">
+        <button class="secondary-button small-button" onclick="voltarParaProcessos()">Voltar</button>
+        <button class="danger-outline-button small-button" onclick="confirmarLimparHistorico()">Limpar histórico</button>
+      </div>
+
+      <div id="historicoLista" class="history-list"></div>
+
+      <div class="footer-brand">
+        <img src="../assets/raizen-logo.png" alt="Raízen">
+      </div>
+    </div>
+  </div>
+
+  <div id="modalConfirmacao" class="modal">
+    <div class="modal-content">
+      <h3>Confirmar exclusão</h3>
+      <p id="textoConfirmacao">Deseja realmente excluir este registro?</p>
+      <div class="modal-actions">
+        <button onclick="fecharModalConfirmacao()">Cancelar</button>
+        <button class="danger-button" onclick="executarAcaoConfirmada()">Excluir</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/storage.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/historico.js"></script>
+</body>
+</html>

@@ -19,9 +19,14 @@
 
       <div class="checklist-box" id="checklistContainer"></div>
 
-      <button class="button button-fixed" onclick="validarChecklist()">
-        Finalizar Checklist
-      </button>
+      <div class="button-row actions-inline">
+        <button class="button" onclick="validarChecklist()">
+          Finalizar Checklist
+        </button>
+        <button class="history-nav-button" onclick="irParaHistorico()">
+          Ver histórico
+        </button>
+      </div>
 
       <div class="footer-brand">
         <img src="../assets/raizen-logo.png" alt="Raízen">
@@ -41,7 +46,12 @@
     <div class="modal-content sucesso">
       <h3>Sucesso</h3>
       <p>Checklist finalizado com sucesso!</p>
-      <button onclick="fecharModalSucesso()">OK</button>
+      <div class="modal-actions">
+        <button onclick="fecharModalSucesso()">OK</button>
+        <button class="history-nav-button modal-history-button" onclick="irParaHistorico()">
+          Ir para histórico
+        </button>
+      </div>
     </div>
   </div>
 
@@ -92,30 +102,37 @@
       localStorage.setItem(montarChaveChecklist(), JSON.stringify(progresso));
     }
 
-function salvarFinalizacaoChecklist() {
-    const processo = lerTexto("processoSelecionado");
-    const competencia = lerTexto("competenciaSelecionada");
-    const estados = lerLista("estadosSelecionados");
-    const filiais = lerLista("filiaisSelecionadas");
-    const usuario = lerTexto("usuarioLogado");
+    function salvarFinalizacaoChecklist() {
+      const processo = lerTexto("processoSelecionado");
+      const competencia = lerTexto("competenciaSelecionada");
+      const estados = lerLista("estadosSelecionados");
+      const filiais = lerLista("filiaisSelecionadas");
+      const usuario = lerTexto("usuarioLogado");
 
-    const registro = {
-      processo: processo || "",
-      competencia: competencia || "",
-      estados: estados || [],
-      filiais: filiais || [],
-      usuario: usuario || "",
-      finalizadoEm: new Date().toLocaleString("pt-BR"),
-      status: "finalizado"
-    };
+      const totalTarefas = tarefasAtuais.length;
+      const concluidas = document.querySelectorAll(".task-checkbox:checked").length;
 
-    localStorage.setItem(`${montarChaveChecklist()}_finalizado`, JSON.stringify(registro));
-  }
+      const registro = {
+        id: String(Date.now()),
+        processo: processo || "",
+        competencia: competencia || "",
+        estados: estados || [],
+        filiais: filiais || [],
+        usuario: usuario || "",
+        finalizadoEm: new Date().toLocaleString("pt-BR"),
+        status: "finalizado",
+        totalTarefas: totalTarefas,
+        concluidas: concluidas
+      };
 
-  function obterFinalizacaoChecklist() {
-    const dado = localStorage.getItem(`${montarChaveChecklist()}_finalizado`);
-    return dado ? JSON.parse(dado) : null;
-  }
+      localStorage.setItem(`${montarChaveChecklist()}_finalizado`, JSON.stringify(registro));
+      adicionarHistoricoChecklist(registro);
+    }
+
+    function obterFinalizacaoChecklist() {
+      const dado = localStorage.getItem(`${montarChaveChecklist()}_finalizado`);
+      return dado ? JSON.parse(dado) : null;
+    }
 
     function carregarProgressoChecklist() {
       const progressoSalvo = localStorage.getItem(montarChaveChecklist());
@@ -212,25 +229,25 @@ function salvarFinalizacaoChecklist() {
       box.style.display = box.style.display === "block" ? "none" : "block";
     }
 
-  function validarChecklist() {
-    const checkboxes = document.querySelectorAll(".task-checkbox");
-    let todosMarcados = true;
+    function validarChecklist() {
+      const checkboxes = document.querySelectorAll(".task-checkbox");
+      let todosMarcados = true;
 
-    checkboxes.forEach(function (checkbox) {
-      if (!checkbox.checked) {
-        todosMarcados = false;
+      checkboxes.forEach(function (checkbox) {
+        if (!checkbox.checked) {
+          todosMarcados = false;
+        }
+      });
+
+      if (!todosMarcados || checkboxes.length === 0) {
+        document.getElementById("modal").style.display = "flex";
+        return;
       }
-    });
 
-    if (!todosMarcados || checkboxes.length === 0) {
-      document.getElementById("modal").style.display = "flex";
-      return;
+      salvarProgressoChecklist();
+      salvarFinalizacaoChecklist();
+      document.getElementById("modalSucesso").style.display = "flex";
     }
-
-    salvarProgressoChecklist();
-    salvarFinalizacaoChecklist();
-    document.getElementById("modalSucesso").style.display = "flex";
-  }
 
     function fecharModal() {
       document.getElementById("modal").style.display = "none";
@@ -238,6 +255,10 @@ function salvarFinalizacaoChecklist() {
 
     function fecharModalSucesso() {
       document.getElementById("modalSucesso").style.display = "none";
+    }
+
+    function irParaHistorico() {
+      window.location.href = "historico.html";
     }
 
     if (exigirLogin() && exigirArea() && exigirProcesso()) {

@@ -8,10 +8,10 @@ app.use(cors());
 app.use(express.json());
 
 const estadosFiliais = {
-  "São Paulo": ["Paulínia", "Campinas", "Ribeirão Preto", "Santos"],
-  "Minas Gerais": ["Belo Horizonte", "Uberlândia"],
-  "Paraná": ["Curitiba", "Londrina"],
-  "Rio de Janeiro": ["Rio de Janeiro", "Duque de Caxias"]
+  "SP": ["Paulínia", "Campinas", "Ribeirão Preto", "Santos"],
+  "MG": ["Belo Horizonte", "Uberlândia"],
+  "PR": ["Curitiba", "Londrina"],
+  "RJ": ["Rio de Janeiro", "Duque de Caxias"]
 };
 
 const tarefasConfig = {
