@@ -1,0 +1,123 @@
+[
+  {
+    "id": "1774029336051",
+    "processo": "SPED",
+    "competencia": "2026-03",
+    "estados": [
+      "São Paulo",
+      "Minas Gerais",
+      "Paraná",
+      "Rio de Janeiro"
+    ],
+    "filiais": [],
+    "usuario": "QWEWE",
+    "finalizadoEm": "20/03/2026, 14:55:36",
+    "status": "finalizado",
+    "totalTarefas": 1,
+    "concluidas": 1,
+    "tarefas": [
+      {
+        "titulo": "Gerar arquivo SPED",
+        "concluida": true
+      }
+    ]
+  },
+  {
+    "id": "1774028075908",
+    "processo": "Apuração",
+    "competencia": "2026-03",
+    "estados": [
+      "São Paulo",
+      "Minas Gerais"
+    ],
+    "filiais": [
+      "Belo Horizonte",
+      "Campinas",
+      "Paulínia",
+      "Piracicaba"
+    ],
+    "usuario": "weqweqwe",
+    "finalizadoEm": "20/03/2026, 14:34:35",
+    "status": "finalizado",
+    "totalTarefas": 1,
+    "concluidas": 1,
+    "tarefas": [
+      {
+        "titulo": "Fechar apuração estadual",
+        "concluida": true
+      }
+    ]
+  },
+  {
+    "id": "1774027956319",
+    "processo": "Apuração",
+    "competencia": "2026-03",
+    "estados": [
+      "São Paulo",
+      "Minas Gerais"
+    ],
+    "filiais": [
+      "Belo Horizonte",
+      "Campinas",
+      "Paulínia",
+      "Piracicaba"
+    ],
+    "usuario": "weqweqwe",
+    "finalizadoEm": "20/03/2026, 14:32:36",
+    "status": "finalizado",
+    "totalTarefas": 1,
+    "concluidas": 1,
+    "tarefas": [
+      {
+        "titulo": "Fechar apuração estadual",
+        "concluida": true
+      }
+    ]
+  },
+  {
+    "id": "1774027933446",
+    "processo": "Apuração",
+    "competencia": "2026-03",
+    "estados": [
+      "São Paulo",
+      "Minas Gerais"
+    ],
+    "filiais": [
+      "Belo Horizonte",
+      "Campinas",
+      "Paulínia",
+      "Piracicaba"
+    ],
+    "usuario": "weqweqwe",
+    "finalizadoEm": "20/03/2026, 14:32:13",
+    "status": "finalizado",
+    "totalTarefas": 1,
+    "concluidas": 1,
+    "tarefas": [
+      {
+        "titulo": "Fechar apuração estadual",
+        "concluida": true
+      }
+    ]
+  },
+  {
+    "id": "1774027745892",
+    "processo": "Apuração",
+    "competencia": "2026-03",
+    "estados": [
+      "São Paulo",
+      "Minas Gerais"
+    ],
+    "filiais": [
+      "Belo Horizonte",
+      "Campinas",
+      "Paulínia",
+      "Piracicaba"
+    ],
+    "usuario": "weqweqwe",
+    "finalizadoEm": "20/03/2026, 14:29:05",
+    "status": "finalizado",
+    "totalTarefas": 1,
+    "concluidas": 1
+  }
+]

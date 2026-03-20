@@ -12,14 +12,10 @@ function formatarTextoLista(lista) {
 }
 
 function formatarCompetencia(valor) {
-  if (!valor) {
-    return "-";
-  }
+  if (!valor) return "-";
 
   const partes = valor.split("-");
-  if (partes.length !== 2) {
-    return valor;
-  }
+  if (partes.length !== 2) return valor;
 
   return `${partes[1]}/${partes[0]}`;
 }
@@ -43,99 +39,149 @@ function executarAcaoConfirmada() {
 }
 
 function confirmarExclusao(id) {
-  abrirModalConfirmacao("Deseja realmente excluir este registro do histórico?", function () {
-    excluirHistoricoChecklist(id);
-    renderizarHistorico();
+  abrirModalConfirmacao("Deseja realmente excluir este registro?", async function () {
+    try {
+      await excluirHistoricoAPI(id);
+      await renderizarHistorico();
+    } catch (erro) {
+      console.error("Erro ao excluir:", erro);
+      alert("Erro ao excluir registro.");
+    }
   });
 }
 
 function confirmarLimparHistorico() {
-  const historico = lerHistoricoChecklists();
-
-  if (!historico.length) {
-    alert("Não há histórico para limpar.");
-    return;
-  }
-
-  abrirModalConfirmacao("Deseja realmente apagar todo o histórico?", function () {
-    limparHistoricoChecklists();
-    renderizarHistorico();
+  abrirModalConfirmacao("Deseja apagar todo o histórico?", async function () {
+    try {
+      await limparHistoricoAPI();
+      await renderizarHistorico();
+    } catch (erro) {
+      console.error("Erro ao limpar:", erro);
+      alert("Erro ao limpar histórico.");
+    }
   });
 }
 
-function renderizarHistorico() {
+
+async function verDetalhes(id) {
+  try {
+    const historico = await buscarHistoricoAPI();
+
+    const item = historico.find(h => String(h.id) === String(id));
+    if (!item) return;
+
+    let html = `
+      <div style="margin-bottom:15px;">
+        <strong>Processo:</strong> ${item.processo}<br>
+        <strong>Competência:</strong> ${formatarCompetencia(item.competencia)}<br>
+        <strong>Usuário:</strong> ${item.usuario}<br>
+        <strong>Data:</strong> ${item.finalizadoEm}
+      </div>
+    `;
+
+    if (item.tarefas && item.tarefas.length) {
+      item.tarefas.forEach((tarefa, i) => {
+        html += `
+          <div style="padding:8px; margin-bottom:6px; border-radius:6px; background:#f5f5f5;">
+            ${tarefa.concluida ? "✅" : "❌"} ${i + 1}. ${tarefa.titulo}
+          </div>
+        `;
+      });
+    } else {
+      html += `<p>Nenhuma tarefa encontrada.</p>`;
+    }
+
+    document.getElementById("conteudoDetalhes").innerHTML = html;
+    document.getElementById("modalDetalhes").style.display = "flex";
+
+  } catch (erro) {
+    console.error("Erro ao abrir detalhes:", erro);
+    alert("Erro ao carregar detalhes.");
+  }
+}
+
+function fecharModalDetalhes() {
+  document.getElementById("modalDetalhes").style.display = "none";
+}
+
+async function renderizarHistorico() {
   const container = document.getElementById("historicoLista");
-  const historico = lerHistoricoChecklists();
 
-  if (!historico.length) {
-    container.innerHTML = `
-      <div class="empty-history">
-        <div class="empty-history-icon">🗂️</div>
-        <h3>Nenhum checklist finalizado ainda</h3>
-        <p>Assim que você finalizar um checklist, ele aparecerá aqui.</p>
-      </div>
-    `;
-    return;
+  try {
+    const historico = await buscarHistoricoAPI();
+
+    if (!historico.length) {
+      container.innerHTML = `
+        <div class="empty-history">
+          <h3>Nenhum checklist ainda</h3>
+          <p>Finalize um checklist para aparecer aqui.</p>
+        </div>
+      `;
+      return;
+    }
+
+    let html = "";
+
+    historico.forEach(item => {
+      html += `
+        <div class="history-card">
+
+          <div class="history-card-top">
+            <div>
+              <div class="history-processo">${item.processo}</div>
+              <div class="history-date">${item.finalizadoEm}</div>
+            </div>
+
+            <span class="status-badge success">
+              Concluído
+            </span>
+          </div>
+
+          <div class="history-grid">
+            <div>
+              <strong>Competência:</strong> ${formatarCompetencia(item.competencia)}
+            </div>
+
+            <div>
+              <strong>Usuário:</strong> ${item.usuario}
+            </div>
+
+            <div>
+              <strong>Estados:</strong> ${formatarTextoLista(item.estados)}
+            </div>
+
+            <div>
+              <strong>Filiais:</strong> ${formatarTextoLista(item.filiais)}
+            </div>
+
+            <div>
+              <strong>Concluídas:</strong> ${item.concluidas}/${item.totalTarefas}
+            </div>
+          </div>
+
+          <div class="history-card-actions">
+            <button onclick="verDetalhes('${item.id}')">
+              Ver detalhes
+            </button>
+
+            <button onclick="confirmarExclusao('${item.id}')">
+              Excluir
+            </button>
+          </div>
+
+        </div>
+      `;
+    });
+
+    container.innerHTML = html;
+
+  } catch (erro) {
+    console.error("Erro ao carregar histórico:", erro);
+    alert("Erro ao carregar histórico.");
   }
-
-  let html = "";
-
-  historico.forEach(function (item) {
-    html += `
-      <div class="history-card">
-        <div class="history-card-top">
-          <div>
-            <div class="history-processo">${item.processo || "-"}</div>
-            <div class="history-date">${item.finalizadoEm || "-"}</div>
-          </div>
-          <span class="status-badge ${item.status === "finalizado" ? "success" : "pending"}">
-            ${item.status === "finalizado" ? "Concluído" : "Pendente"}
-          </span>
-        </div>
-
-        <div class="history-grid">
-          <div class="history-info-box">
-            <span class="history-label">Competência</span>
-            <strong>${formatarCompetencia(item.competencia)}</strong>
-          </div>
-
-          <div class="history-info-box">
-            <span class="history-label">Usuário</span>
-            <strong>${item.usuario || "-"}</strong>
-          </div>
-
-          <div class="history-info-box full-width">
-            <span class="history-label">Estados</span>
-            <strong>${formatarTextoLista(item.estados)}</strong>
-          </div>
-
-          <div class="history-info-box full-width">
-            <span class="history-label">Filiais</span>
-            <strong>${formatarTextoLista(item.filiais)}</strong>
-          </div>
-
-          <div class="history-info-box">
-            <span class="history-label">Concluídas</span>
-            <strong>${item.concluidas || 0}/${item.totalTarefas || 0}</strong>
-          </div>
-
-          <div class="history-info-box">
-            <span class="history-label">ID</span>
-            <strong>${item.id}</strong>
-          </div>
-        </div>
-
-        <div class="history-card-actions">
-          <button class="danger-outline-button small-button" onclick="confirmarExclusao('${item.id}')">
-            Excluir
-          </button>
-        </div>
-      </div>
-    `;
-  });
-
-  container.innerHTML = html;
 }
+
+
 
 if (exigirLogin() && exigirArea()) {
   renderizarHistorico();

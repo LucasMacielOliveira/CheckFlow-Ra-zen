@@ -102,32 +102,40 @@
       localStorage.setItem(montarChaveChecklist(), JSON.stringify(progresso));
     }
 
-    function salvarFinalizacaoChecklist() {
-      const processo = lerTexto("processoSelecionado");
-      const competencia = lerTexto("competenciaSelecionada");
-      const estados = lerLista("estadosSelecionados");
-      const filiais = lerLista("filiaisSelecionadas");
-      const usuario = lerTexto("usuarioLogado");
+    async function salvarFinalizacaoChecklist() {
+  const processo = lerTexto("processoSelecionado");
+  const competencia = lerTexto("competenciaSelecionada");
+  const estados = lerLista("estadosSelecionados");
+  const filiais = lerLista("filiaisSelecionadas");
+  const usuario = lerTexto("usuarioLogado");
 
-      const totalTarefas = tarefasAtuais.length;
-      const concluidas = document.querySelectorAll(".task-checkbox:checked").length;
+  const checkboxes = document.querySelectorAll(".task-checkbox");
 
-      const registro = {
-        id: String(Date.now()),
-        processo: processo || "",
-        competencia: competencia || "",
-        estados: estados || [],
-        filiais: filiais || [],
-        usuario: usuario || "",
-        finalizadoEm: new Date().toLocaleString("pt-BR"),
-        status: "finalizado",
-        totalTarefas: totalTarefas,
-        concluidas: concluidas
-      };
+  const tarefasDetalhadas = [];
 
-      localStorage.setItem(`${montarChaveChecklist()}_finalizado`, JSON.stringify(registro));
-      adicionarHistoricoChecklist(registro);
-    }
+  checkboxes.forEach((checkbox, index) => {
+    tarefasDetalhadas.push({
+      titulo: tarefasAtuais[index].titulo,
+      concluida: checkbox.checked
+    });
+  });
+
+  const registro = {
+    id: String(Date.now()),
+    processo: processo || "",
+    competencia: competencia || "",
+    estados: estados || [],
+    filiais: filiais || [],
+    usuario: usuario || "",
+    finalizadoEm: new Date().toLocaleString("pt-BR"),
+    status: "finalizado",
+    totalTarefas: tarefasDetalhadas.length,
+    concluidas: tarefasDetalhadas.filter(t => t.concluida).length,
+    tarefas: tarefasDetalhadas
+  };
+
+  await salvarHistoricoAPI(registro);
+}
 
     function obterFinalizacaoChecklist() {
       const dado = localStorage.getItem(`${montarChaveChecklist()}_finalizado`);
@@ -229,25 +237,30 @@
       box.style.display = box.style.display === "block" ? "none" : "block";
     }
 
-    function validarChecklist() {
-      const checkboxes = document.querySelectorAll(".task-checkbox");
-      let todosMarcados = true;
+    async function validarChecklist() {
+  const checkboxes = document.querySelectorAll(".task-checkbox");
+  let todosMarcados = true;
 
-      checkboxes.forEach(function (checkbox) {
-        if (!checkbox.checked) {
-          todosMarcados = false;
-        }
-      });
-
-      if (!todosMarcados || checkboxes.length === 0) {
-        document.getElementById("modal").style.display = "flex";
-        return;
-      }
-
-      salvarProgressoChecklist();
-      salvarFinalizacaoChecklist();
-      document.getElementById("modalSucesso").style.display = "flex";
+  checkboxes.forEach(function (checkbox) {
+    if (!checkbox.checked) {
+      todosMarcados = false;
     }
+  });
+
+  if (!todosMarcados || checkboxes.length === 0) {
+    document.getElementById("modal").style.display = "flex";
+    return;
+  }
+
+  try {
+    salvarProgressoChecklist();
+    await salvarFinalizacaoChecklist();
+    document.getElementById("modalSucesso").style.display = "flex";
+  } catch (erro) {
+    console.error("Erro ao salvar finalização:", erro);
+    alert("Erro ao salvar histórico no servidor.");
+  }
+}
 
     function fecharModal() {
       document.getElementById("modal").style.display = "none";
@@ -265,6 +278,7 @@
       montarResumo();
       carregarChecklist();
     }
+    
   </script>
 </body>
 </html>

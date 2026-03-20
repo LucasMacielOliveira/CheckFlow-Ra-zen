@@ -41,3 +41,53 @@ async function buscarTarefas(processo, estado, filial) {
 
   return await response.json();
 }
+
+async function buscarHistoricoAPI() {
+  const response = await fetch(`${API_BASE_URL}/historico`);
+
+  if (!response.ok) {
+    throw new Error("Erro ao buscar histórico");
+  }
+
+  return await response.json();
+}
+
+async function salvarHistoricoAPI(registro) {
+  const response = await fetch(`${API_BASE_URL}/historico`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(registro)
+  });
+
+  if (!response.ok) {
+    throw new Error("Erro ao salvar histórico");
+  }
+
+  return await response.json();
+}
+
+async function excluirHistoricoAPI(id) {
+  const response = await fetch(`${API_BASE_URL}/historico/${encodeURIComponent(id)}`, {
+    method: "DELETE"
+  });
+
+  if (!response.ok) {
+    throw new Error("Erro ao excluir histórico");
+  }
+
+  return await response.json();
+}
+
+async function limparHistoricoAPI() {
+  const response = await fetch(`${API_BASE_URL}/historico`, {
+    method: "DELETE"
+  });
+
+  if (!response.ok) {
+    throw new Error("Erro ao limpar histórico");
+  }
+
+  return await response.json();
+}

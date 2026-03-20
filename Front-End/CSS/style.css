@@ -787,3 +787,99 @@ body {
     width: 100%;
   }
 }
+
+.modal-detalhes {
+  max-width: 640px;
+  text-align: left;
+}
+
+.detalhes-conteudo {
+  max-height: 420px;
+  overflow-y: auto;
+  margin: 18px 0;
+  padding-right: 6px;
+}
+
+.detalhes-resumo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  background: var(--bg-soft);
+  border: 1px solid var(--border-soft);
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 16px;
+  color: var(--text-dark);
+}
+
+.detalhes-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.detalhe-tarefa {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-radius: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--border-soft);
+  background: #fff;
+}
+
+.detalhe-tarefa.ok {
+  background: #eef8ef;
+  border-color: #cfe7d1;
+}
+
+.detalhe-tarefa.pendente {
+  background: #fff5f5;
+  border-color: #f1c9c9;
+}
+
+.detalhe-status {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.detalhe-texto {
+  color: var(--text-dark);
+  font-size: 15px;
+}
+
+@media (max-width: 768px) {
+  .detalhes-resumo {
+    grid-template-columns: 1fr;
+  }
+}
+
+.history-card-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: 15px;
+}
+
+.history-card-actions button {
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  background: white;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.history-card-actions button:hover {
+  background: #f2f2f2;
+}
+
+.history-card-actions button:last-child {
+  border: 1px solid #c62828;
+  color: #c62828;
+}
+
+.history-card-actions button:last-child:hover {
+  background: #ffecec;
+}
