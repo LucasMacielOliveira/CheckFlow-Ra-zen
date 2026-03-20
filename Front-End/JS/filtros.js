@@ -9,7 +9,7 @@ function filtrarOpcoes(searchInputId, optionClass) {
   const termo = normalizarTexto(document.getElementById(searchInputId).value);
   const opcoes = document.querySelectorAll("." + optionClass);
 
-  opcoes.forEach(function(opcao) {
+  opcoes.forEach(function (opcao) {
     const texto = normalizarTexto(opcao.textContent);
     opcao.style.display = texto.includes(termo) ? "block" : "none";
   });
@@ -19,7 +19,7 @@ function toggleSelecionarTodos(masterId, checkboxClass, previewId, previewLabel)
   const marcarTodos = document.getElementById(masterId).checked;
   const checkboxes = document.querySelectorAll("." + checkboxClass);
 
-  checkboxes.forEach(function(checkbox) {
+  checkboxes.forEach(function (checkbox) {
     checkbox.checked = marcarTodos;
   });
 
@@ -32,7 +32,7 @@ function atualizarPreview(checkboxClass, previewId, previewLabel, masterId) {
 
   let selecionados = [];
 
-  checkboxesMarcados.forEach(function(checkbox) {
+  checkboxesMarcados.forEach(function (checkbox) {
     selecionados.push(checkbox.value);
   });
 
@@ -58,14 +58,22 @@ function obterSelecionados(checkboxClass) {
   const checkboxes = document.querySelectorAll("." + checkboxClass + ":checked");
   let selecionados = [];
 
-  checkboxes.forEach(function(checkbox) {
+  checkboxes.forEach(function (checkbox) {
     selecionados.push(checkbox.value);
   });
 
   return selecionados;
 }
 
-function renderizarOpcoes(containerId, items, checkboxClass, optionClass, previewId, previewLabel, masterId) {
+function renderizarOpcoes(
+  containerId,
+  items,
+  checkboxClass,
+  optionClass,
+  previewId,
+  previewLabel,
+  masterId
+) {
   const container = document.getElementById(containerId);
 
   if (!container) {
@@ -83,7 +91,7 @@ function renderizarOpcoes(containerId, items, checkboxClass, optionClass, previe
     </label>
   `;
 
-  items.forEach(function(item) {
+  items.forEach(function (item) {
     html += `
       <label class="option-item ${optionClass}">
         <input

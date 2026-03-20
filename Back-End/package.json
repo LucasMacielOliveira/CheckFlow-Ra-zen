@@ -1,17 +1,17 @@
 {
-  "name": "back-end",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "dependencies": {
-    "cors": "^2.8.6",
-    "express": "^5.2.1"
-  }
+ "name": "checkflow-backend",
+ "version": "1.0.0",
+ "description": "Backend do CheckFlow",
+ "main": "src/server.js",
+ "scripts": {
+   "start": "node src/server.js",
+   "dev": "nodemon src/server.js"
+ },
+ "dependencies": {
+   "cors": "^2.8.5",
+   "express": "^4.21.2"
+ },
+ "devDependencies": {
+   "nodemon": "^3.1.10"
+ }
 }

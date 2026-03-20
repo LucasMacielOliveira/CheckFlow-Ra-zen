@@ -9,7 +9,7 @@
   <div class="page">
     <div class="card">
       <div class="logo">
-        <img src="../assets/CheckFlowLogo.png" alt="CheckFlow">
+        <img src="../assets/checkflow-logo.png" alt="CheckFlow">
       </div>
 
       <div class="subtitle">Selecione os filtros</div>
@@ -60,7 +60,7 @@
       <button class="button button-fixed" onclick="continuar()">Continuar</button>
 
       <div class="footer-brand">
-        <img src="../assets/logo.png" alt="Raízen">
+        <img src="../assets/raizen-logo.png" alt="Raízen">
       </div>
     </div>
   </div>
@@ -97,6 +97,7 @@
     async function carregarEstados() {
       try {
         const estados = await buscarEstados();
+        console.log("Estados recebidos:", estados);
 
         renderizarOpcoes(
           "listaEstados",
@@ -127,7 +128,7 @@
       const estadosSalvos = lerLista("estadosSelecionados");
       const checkboxes = document.querySelectorAll(".estado-checkbox");
 
-      checkboxes.forEach(function(checkbox) {
+      checkboxes.forEach(function (checkbox) {
         checkbox.checked = estadosSalvos.includes(checkbox.value);
       });
     }
@@ -136,7 +137,7 @@
       const filiaisSalvas = lerLista("filiaisSelecionadas");
       const checkboxes = document.querySelectorAll(".filial-checkbox");
 
-      checkboxes.forEach(function(checkbox) {
+      checkboxes.forEach(function (checkbox) {
         checkbox.checked = filiaisSalvas.includes(checkbox.value);
       });
     }
@@ -161,7 +162,7 @@
         for (const estado of estadosSelecionados) {
           const filiaisDoEstado = await buscarFiliaisPorEstado(estado);
 
-          filiaisDoEstado.forEach(function(filial) {
+          filiaisDoEstado.forEach(function (filial) {
             if (!filiais.includes(filial)) {
               filiais.push(filial);
             }
@@ -169,6 +170,7 @@
         }
 
         filiais.sort();
+        console.log("Filiais recebidas:", filiais);
 
         renderizarOpcoes(
           "listaFiliais",
@@ -201,7 +203,7 @@
     }
 
     function ativarEventos() {
-      document.addEventListener("change", async function(event) {
+      document.addEventListener("change", async function (event) {
         if (event.target.classList.contains("estado-checkbox")) {
           atualizarPreview(
             "estado-checkbox",
@@ -213,7 +215,7 @@
         }
 
         if (event.target.id === "selecionarTodosEstados") {
-          setTimeout(async function() {
+          setTimeout(async function () {
             const estadosSelecionados = obterSelecionados("estado-checkbox");
             salvarLista("estadosSelecionados", estadosSelecionados);
             salvarLista("filiaisSelecionadas", []);
@@ -233,7 +235,7 @@
         }
 
         if (event.target.id === "selecionarTodosFiliais") {
-          setTimeout(function() {
+          setTimeout(function () {
             atualizarPreview(
               "filial-checkbox",
               "previewFiliais",
