@@ -1,5 +1,6 @@
 const API_BASE_URL = "http://localhost:3000";
 
+// Buscar estados e filiais
 async function buscarEstados() {
   const response = await fetch(`${API_BASE_URL}/estados`);
 
@@ -41,6 +42,8 @@ async function buscarTarefas(processo, estado, filial) {
 
   return await response.json();
 }
+
+// HISTÓRICO
 
 async function buscarHistoricoAPI() {
   const response = await fetch(`${API_BASE_URL}/historico`);
@@ -87,6 +90,69 @@ async function limparHistoricoAPI() {
 
   if (!response.ok) {
     throw new Error("Erro ao limpar histórico");
+  }
+
+  return await response.json();
+}
+
+ // ADMIN - TAREFAS
+
+async function salvarTarefaAPI(tarefa) {
+  const response = await fetch(`${API_BASE_URL}/admin/tarefas`);
+  return await response.json();
+}
+
+async function criarTarefaAPI(tarefa) {
+  const response = await fetch(`${API_BASE_URL}/admin/tarefas`, {
+    method: "POST",
+    headers: {
+      "contentType": "application/json"
+
+    },
+    body: JSON.stringify(tarefa)
+  });
+  return await response.json();
+}
+
+async function excluirTarefaAPI(id) {
+  const response = await fetch(`${API_BASE_URL}/admin/tarefas/${encodeURIComponent(id)}`, {
+    method: "DELETE"
+  });
+}
+
+async function buscarTarefasAdmin() {
+  const response = await fetch(`${API_BASE_URL}/admin/tarefas`);
+
+  if (!response.ok) {
+    throw new Error("Erro ao buscar tarefas do admin");
+  }
+
+  return await response.json();
+}
+
+async function criarTarefaAPI(tarefa) {
+  const response = await fetch(`${API_BASE_URL}/admin/tarefas`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(tarefa)
+  });
+
+  if (!response.ok) {
+    throw new Error("Erro ao criar tarefa");
+  }
+
+  return await response.json();
+}
+
+async function excluirTarefaAPI(id) {
+  const response = await fetch(`${API_BASE_URL}/admin/tarefas/${encodeURIComponent(id)}`, {
+    method: "DELETE"
+  });
+
+  if (!response.ok) {
+    throw new Error("Erro ao excluir tarefa");
   }
 
   return await response.json();

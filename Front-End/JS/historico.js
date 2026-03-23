@@ -65,38 +65,74 @@ function confirmarLimparHistorico() {
 
 async function verDetalhes(id) {
   try {
-    const historico = await buscarHistoricoAPI();
+    console.log("ID recebido:", id);
 
-    const item = historico.find(h => String(h.id) === String(id));
-    if (!item) return;
+    if (typeof buscarHistoricoAPI !== "function") {
+      throw new Error("Função buscarHistoricoAPI não encontrada.");
+    }
+
+    const historico = await buscarHistoricoAPI();
+    console.log("Histórico carregado:", historico);
+
+    const item = historico.find(function (h) {
+      return String(h.id) === String(id);
+    });
+
+    console.log("Item encontrado:", item);
+
+    if (!item) {
+      throw new Error("Registro não encontrado no histórico.");
+    }
+
+    const modal = document.getElementById("modalDetalhes");
+    const conteudo = document.getElementById("conteudoDetalhes");
+
+    if (!modal) {
+      throw new Error("Elemento #modalDetalhes não existe no HTML.");
+    }
+
+    if (!conteudo) {
+      throw new Error("Elemento #conteudoDetalhes não existe no HTML.");
+    }
 
     let html = `
       <div style="margin-bottom:15px;">
-        <strong>Processo:</strong> ${item.processo}<br>
-        <strong>Competência:</strong> ${formatarCompetencia(item.competencia)}<br>
-        <strong>Usuário:</strong> ${item.usuario}<br>
-        <strong>Data:</strong> ${item.finalizadoEm}
+        <strong>Processo:</strong> ${item.processo || "-"}<br>
+        <strong>Competência:</strong> ${formatarCompetencia(item.competencia || "")}<br>
+        <strong>Usuário:</strong> ${item.usuario || "-"}<br>
+        <strong>Data:</strong> ${item.finalizadoEm || "-"}
       </div>
     `;
 
-    if (item.tarefas && item.tarefas.length) {
-      item.tarefas.forEach((tarefa, i) => {
+    if (Array.isArray(item.tarefas) && item.tarefas.length > 0) {
+      item.tarefas.forEach(function (tarefa, i) {
         html += `
           <div style="padding:8px; margin-bottom:6px; border-radius:6px; background:#f5f5f5;">
-            ${tarefa.concluida ? "✅" : "❌"} ${i + 1}. ${tarefa.titulo}
+            ${tarefa.concluida ? "✅" : "❌"} ${i + 1}. ${tarefa.titulo || "Sem título"}
           </div>
         `;
       });
     } else {
-      html += `<p>Nenhuma tarefa encontrada.</p>`;
+      html += `
+        <div style="padding:10px; border-radius:6px; background:#fff3cd; color:#856404;">
+          Esse checklist não possui tarefas detalhadas salvas.
+        </div>
+      `;
     }
 
-    document.getElementById("conteudoDetalhes").innerHTML = html;
-    document.getElementById("modalDetalhes").style.display = "flex";
+    conteudo.innerHTML = html;
+    modal.style.display = "flex";
 
   } catch (erro) {
-    console.error("Erro ao abrir detalhes:", erro);
-    alert("Erro ao carregar detalhes.");
+    console.error("Erro real ao carregar detalhes:", erro);
+    alert("Erro ao carregar detalhes: " + erro.message);
+  }
+}
+
+function fecharModalDetalhes() {
+  const modal = document.getElementById("modalDetalhes");
+  if (modal) {
+    modal.style.display = "none";
   }
 }
 

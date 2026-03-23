@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>CheckFlow - Admin</title>
+  <link rel="stylesheet" href="../CSS/style.css">
+</head>
+<body>
+  <div class="page">
+    <div class="card card-history">
+      <div class="logo">
+        <img src="../assets/checkflow-logo.png" alt="CheckFlow">
+      </div>
+
+      <div class="history-header">
+        <div class="subtitle no-margin">Painel Admin</div>
+        <p class="history-description">
+          Cadastre, visualize e exclua tarefas do sistema.
+        </p>
+      </div>
+
+      <div class="admin-layout">
+        <div class="admin-form-card">
+          <h3 class="selection-title">Nova tarefa</h3>
+
+          <label class="admin-label">Processo</label>
+          <select id="processo" class="input">
+            <option value="">Selecione</option>
+            <option value="Apuração">Apuração</option>
+            <option value="SPED">SPED</option>
+            <option value="SCANC">SCANC</option>
+          </select>
+
+          <label class="admin-label">Estado</label>
+          <select id="estado" class="input">
+            <option value="">Selecione</option>
+          </select>
+
+          <label class="admin-label">Filial</label>
+          <select id="filial" class="input">
+            <option value="">Sem filial específica</option>
+          </select>
+
+          <label class="admin-label">Título da tarefa</label>
+          <input id="titulo" class="input" type="text" placeholder="Ex.: Gerar arquivo SPED" />
+
+          <label class="admin-label">Instruções</label>
+          <textarea
+            id="instrucao"
+            class="input admin-textarea"
+            placeholder="Digite uma instrução por linha"
+          ></textarea>
+
+          <div class="admin-actions">
+            <button class="button" onclick="salvarTarefa()">Salvar tarefa</button>
+          </div>
+        </div>
+
+        <div class="admin-list-card">
+          <div class="admin-list-header">
+            <h3 class="selection-title">Tarefas cadastradas</h3>
+            <button class="secondary-button small-button" onclick="carregarTarefasAdminTela()">
+              Atualizar
+            </button>
+          </div>
+
+          <div id="listaTarefasAdmin" class="history-list"></div>
+        </div>
+      </div>
+
+      <div class="footer-brand">
+        <img src="../assets/raizen-logo.png" alt="Raízen">
+      </div>
+    </div>
+  </div>
+
+  <script src="../JS/storage.js"></script>
+  <script src="../JS/auth.js"></script>
+  <script src="../JS/api.js"></script>
+  <script src="../JS/admin.js"></script>
+</body>
+</html>

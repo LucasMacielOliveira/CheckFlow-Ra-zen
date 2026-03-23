@@ -6,36 +6,53 @@ const path = require("path");
 const app = express();
 const PORT = 3000;
 
+/*  CONFIG  */
+
 app.use(cors());
 app.use(express.json());
 
-const caminhoHistorico = path.join(__dirname, "data", "historico.json");
+/*  CAMINHOS  */
 
-function lerHistoricoArquivo() {
-  try {
-    const pastaData = path.join(__dirname, "data");
+const pastaData = path.join(__dirname, "data");
 
-    if (!fs.existsSync(pastaData)) {
-      fs.mkdirSync(pastaData, { recursive: true });
-    }
+const caminhoHistorico = path.join(pastaData, "historico.json");
+const caminhoTarefas = path.join(pastaData, "tarefas.json");
 
-    if (!fs.existsSync(caminhoHistorico)) {
-      fs.writeFileSync(caminhoHistorico, JSON.stringify([], null, 2), "utf-8");
-    }
+/*  UTILS  */
 
-    const conteudo = fs.readFileSync(caminhoHistorico, "utf-8");
-    return JSON.parse(conteudo || "[]");
-  } catch (erro) {
-    console.error("Erro ao ler histórico:", erro);
-    return [];
+function garantirArquivo(caminho) {
+  if (!fs.existsSync(pastaData)) {
+    fs.mkdirSync(pastaData, { recursive: true });
+  }
+
+  if (!fs.existsSync(caminho)) {
+    fs.writeFileSync(caminho, JSON.stringify([], null, 2), "utf-8");
   }
 }
 
-function salvarHistoricoArquivo(lista) {
-  fs.writeFileSync(caminhoHistorico, JSON.stringify(lista, null, 2), "utf-8");
+/*  HISTÓRICO  */
+
+function lerHistorico() {
+  garantirArquivo(caminhoHistorico);
+  return JSON.parse(fs.readFileSync(caminhoHistorico, "utf-8"));
 }
 
-// dados provisórios para filiais e tarefas
+function salvarHistorico(lista) {
+  fs.writeFileSync(caminhoHistorico, JSON.stringify(lista, null, 2));
+}
+
+/*  TAREFAS  */
+
+function lerTarefas() {
+  garantirArquivo(caminhoTarefas);
+  return JSON.parse(fs.readFileSync(caminhoTarefas, "utf-8"));
+}
+
+function salvarTarefas(lista) {
+  fs.writeFileSync(caminhoTarefas, JSON.stringify(lista, null, 2));
+}
+
+/*  DADOS FIXOS  */
 
 const filiaisPorEstado = {
   "São Paulo": ["Paulínia", "Campinas", "Piracicaba"],
@@ -44,76 +61,10 @@ const filiaisPorEstado = {
   "Rio de Janeiro": ["Rio de Janeiro", "Campos"]
 };
 
-const tarefas = {
-  "Apuração": {
-    "São Paulo": {
-      "Paulínia": [
-        {
-          titulo: "Conferir notas fiscais",
-          instrucao: [
-            "Acessar o sistema fiscal",
-            "Validar notas emitidas",
-            "Comparar com relatório do período"
-          ]
-        },
-        {
-          titulo: "Validar impostos",
-          instrucao: [
-            "Conferir alíquotas aplicadas",
-            "Verificar base de cálculo",
-            "Aprovar lançamento"
-          ]
-        }
-      ]
-    },
-    "Minas Gerais": {
-      geral: [
-        {
-          titulo: "Fechar apuração estadual",
-          instrucao: [
-            "Verificar lançamentos do período",
-            "Conferir relatórios",
-            "Encerrar a apuração"
-          ]
-        }
-      ]
-    }
-  },
-  "SPED": {
-    "São Paulo": {
-      geral: [
-        {
-          titulo: "Gerar arquivo SPED",
-          instrucao: [
-            "Abrir módulo SPED",
-            "Selecionar período",
-            "Gerar arquivo final"
-          ]
-        }
-      ]
-    }
-  },
-  "SCANC": {
-    "São Paulo": {
-      geral: [
-        {
-          titulo: "Validar movimentações SCANC",
-          instrucao: [
-            "Acessar relatório de movimentações",
-            "Conferir inconsistências",
-            "Registrar validação"
-          ]
-        }
-      ]
-    }
-  }
-};
-
-// Rotas para dados de filiais e tarefas
+/*  ROTAS PADRÃO  */
 
 app.get("/estados", (req, res) => {
-  const estados = Object.keys(filiaisPorEstado);
-  res.json(estados);
+  res.json(Object.keys(filiaisPorEstado));
 });
 
 app.get("/filiais", (req, res) => {
@@ -123,9 +74,10 @@ app.get("/filiais", (req, res) => {
     return res.status(400).json({ erro: "Estado é obrigatório." });
   }
 
-  const filiais = filiaisPorEstado[estado] || [];
-  res.json(filiais);
+  res.json(filiaisPorEstado[estado] || []);
 });
+
+/*  TAREFAS (USO NORMAL)  */
 
 app.get("/tarefas", (req, res) => {
   const { processo, estado, filial } = req.query;
@@ -134,73 +86,93 @@ app.get("/tarefas", (req, res) => {
     return res.status(400).json({ erro: "Processo e estado são obrigatórios." });
   }
 
-  const processoData = tarefas[processo];
-  if (!processoData) {
-    return res.json([]);
-  }
+  const tarefas = lerTarefas();
 
-  const estadoData = processoData[estado];
-  if (!estadoData) {
-    return res.json([]);
-  }
+  const filtradas = tarefas.filter(t => {
+    return (
+      t.processo === processo &&
+      t.estado === estado &&
+      (!t.filial || t.filial === filial)
+    );
+  });
 
-  if (filial && estadoData[filial]) {
-    return res.json(estadoData[filial]);
-  }
-
-  if (estadoData.geral) {
-    return res.json(estadoData.geral);
-  }
-
-  res.json([]);
+  res.json(filtradas);
 });
 
-// Rotas para histórico de tarefas
+/*  HISTÓRICO  */
 
-app.get("/historico", (req, res) => { // Retorna o histórico completo
-  const historico = lerHistoricoArquivo();
-  res.json(historico);
+app.get("/historico", (req, res) => {
+  res.json(lerHistorico());
 });
 
 app.post("/historico", (req, res) => {
-  console.log("BODY RECEBIDO:", req.body);
+  const novo = req.body;
 
-  const novoRegistro = req.body;
-
-  if (!novoRegistro || !novoRegistro.id) {
+  if (!novo || !novo.id) {
     return res.status(400).json({ erro: "Registro inválido." });
   }
 
-  const historico = lerHistoricoArquivo();
-  historico.unshift(novoRegistro);
-  salvarHistoricoArquivo(historico);
+  const historico = lerHistorico();
+  historico.unshift(novo);
 
-  res.status(201).json({
-    mensagem: "Histórico salvo com sucesso.",
-    registro: novoRegistro
-  });
+  salvarHistorico(historico);
+
+  res.status(201).json(novo);
 });
 
-app.delete("/historico/:id", (req, res) => { // Exclui um registro do histórico pelo ID
+app.delete("/historico/:id", (req, res) => {
   const { id } = req.params;
-  const historico = lerHistoricoArquivo();
 
-  const atualizado = historico.filter((item) => String(item.id) !== String(id));
+  let historico = lerHistorico();
+  historico = historico.filter(h => String(h.id) !== String(id));
 
-  if (atualizado.length === historico.length) { 
-    return res.status(404).json({ erro: "Registro não encontrado." });
-  }
+  salvarHistorico(historico);
 
-  salvarHistoricoArquivo(atualizado);
-
-  res.json({ mensagem: "Registro excluído com sucesso." });
+  res.json({ mensagem: "Registro excluído" });
 });
 
 app.delete("/historico", (req, res) => {
-  salvarHistoricoArquivo([]);
-  res.json({ mensagem: "Histórico limpo com sucesso." });
+  salvarHistorico([]);
+  res.json({ mensagem: "Histórico limpo" });
 });
 
-app.listen(PORT, () => { // Inicia o servidor
+/*  ADMIN - TAREFAS  */
+
+app.get("/admin/tarefas", (req, res) => {
+  res.json(lerTarefas());
+});
+
+app.post("/admin/tarefas", (req, res) => {
+  const nova = req.body;
+
+  if (!nova || !nova.titulo) {
+    return res.status(400).json({ erro: "Dados inválidos" });
+  }
+
+  const tarefas = lerTarefas();
+
+  nova.id = String(Date.now());
+
+  tarefas.push(nova);
+
+  salvarTarefas(tarefas);
+
+  res.status(201).json(nova);
+});
+
+app.delete("/admin/tarefas/:id", (req, res) => {
+  const { id } = req.params;
+
+  let tarefas = lerTarefas();
+  tarefas = tarefas.filter(t => String(t.id) !== String(id));
+
+  salvarTarefas(tarefas);
+
+  res.json({ mensagem: "Tarefa excluída" });
+});
+
+/*  START  */
+
+app.listen(PORT, () => {
   console.log(`Servidor rodando em http://localhost:${PORT}`);
 });
