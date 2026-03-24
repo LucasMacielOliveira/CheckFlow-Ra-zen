@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <title>CheckFlow - Checklist</title>
-  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../CSS/style.css">
 </head>
 <body>
   <div class="page">
-    <div class="card">
+  <div class="card">
 
       <div class="logo">
         <img src="../assets/checkflow-logo.png" alt="CheckFlow">
@@ -55,9 +55,9 @@
     </div>
   </div>
 
-  <script src="../js/storage.js"></script>
-  <script src="../js/auth.js"></script>
-  <script src="../js/api.js"></script>
+  <script src="../JS/storage.js"></script>
+  <script src="../JS/auth.js"></script>
+  <script src="../JS/api.js"></script>
 
   <script>
     let tarefasAtuais = [];
@@ -68,15 +68,26 @@
       const filiais = lerLista("filiaisSelecionadas");
       const competencia = lerTexto("competenciaSelecionada");
 
-      let texto = `<strong>Processo:</strong> ${processo || "-"}<br>`;
-      texto += `<strong>Competência:</strong> ${competencia || "-"}<br>`;
-      texto += `<strong>Estados:</strong> ${estados.length ? estados.join(", ") : "-"}<br>`;
+      const html = `
+        <div>
+          <strong>Processo</strong>
+          <span>${processo || "-"}</span>
+        </div>
+        <div>
+          <strong>Competência</strong>
+          <span>${competencia || "-"}</span>
+        </div>
+        <div>
+          <strong>Estados</strong>
+          <span>${estados.length ? estados.join(", ") : "-"}</span>
+        </div>
+        <div>
+          <strong>Filiais</strong>
+          <span>${filiais.length ? filiais.join(", ") : "-"}</span>
+        </div>
+      `;
 
-      if (filiais.length > 0) {
-        texto += `<strong>Filiais:</strong> ${filiais.join(", ")}`;
-      }
-
-      document.getElementById("infoResumo").innerHTML = texto;
+      document.getElementById("infoResumo").innerHTML = html;
     }
 
     function montarChaveChecklist() {
@@ -103,43 +114,38 @@
     }
 
     async function salvarFinalizacaoChecklist() {
-  const processo = lerTexto("processoSelecionado");
-  const competencia = lerTexto("competenciaSelecionada");
-  const estados = lerLista("estadosSelecionados");
-  const filiais = lerLista("filiaisSelecionadas");
-  const usuario = lerTexto("usuarioLogado");
+      const processo = lerTexto("processoSelecionado");
+      const competencia = lerTexto("competenciaSelecionada");
+      const estados = lerLista("estadosSelecionados");
+      const filiais = lerLista("filiaisSelecionadas");
+      const usuario = lerTexto("usuarioLogado");
 
-  const checkboxes = document.querySelectorAll(".task-checkbox");
+      const checkboxes = document.querySelectorAll(".task-checkbox");
 
-  const tarefasDetalhadas = [];
+      const tarefasDetalhadas = [];
 
-  checkboxes.forEach((checkbox, index) => {
-    tarefasDetalhadas.push({
-      titulo: tarefasAtuais[index].titulo,
-      concluida: checkbox.checked
-    });
-  });
+      checkboxes.forEach((checkbox, index) => {
+        tarefasDetalhadas.push({
+          titulo: tarefasAtuais[index].titulo,
+          concluida: checkbox.checked
+        });
+      });
 
-  const registro = {
-    id: String(Date.now()),
-    processo: processo || "",
-    competencia: competencia || "",
-    estados: estados || [],
-    filiais: filiais || [],
-    usuario: usuario || "",
-    finalizadoEm: new Date().toLocaleString("pt-BR"),
-    status: "finalizado",
-    totalTarefas: tarefasDetalhadas.length,
-    concluidas: tarefasDetalhadas.filter(t => t.concluida).length,
-    tarefas: tarefasDetalhadas
-  };
+      const registro = {
+        id: String(Date.now()),
+        processo,
+        competencia,
+        estados,
+        filiais,
+        usuario,
+        finalizadoEm: new Date().toLocaleString("pt-BR"),
+        status: "finalizado",
+        totalTarefas: tarefasDetalhadas.length,
+        concluidas: tarefasDetalhadas.filter(t => t.concluida).length,
+        tarefas: tarefasDetalhadas
+      };
 
-  await salvarHistoricoAPI(registro);
-}
-
-    function obterFinalizacaoChecklist() {
-      const dado = localStorage.getItem(`${montarChaveChecklist()}_finalizado`);
-      return dado ? JSON.parse(dado) : null;
+      await salvarHistoricoAPI(registro);
     }
 
     function carregarProgressoChecklist() {
@@ -159,37 +165,87 @@
       });
     }
 
-    async function carregarChecklist() {
-      const processo = lerTexto("processoSelecionado");
-      const estados = lerLista("estadosSelecionados");
-      const filiais = lerLista("filiaisSelecionadas");
+  async function carregarChecklist() {
+  const processo = lerTexto("processoSelecionado");
+  const estados = lerLista("estadosSelecionados");
+  const filiais = lerLista("filiaisSelecionadas");
 
-      if (!processo) {
-        alert("Processo não encontrado.");
-        return;
+  if (!processo) {
+    alert("Processo não encontrado.");
+    return;
+  }
+
+  try {
+    let tarefas = [];
+
+    if (processo === "SPED") {
+      const estadoBase = estados[0] || "";
+      const tarefasBase = await buscarTarefas(processo, estadoBase, null);
+
+      tarefasBase.forEach(function (tarefa) {
+        tarefas.push(tarefa);
+      });
+
+      for (let i = 1; i < estados.length; i++) {
+        const estado = estados[i];
+        const tarefasEstado = await buscarTarefas(processo, estado, null);
+
+        tarefasEstado.forEach(function (tarefa) {
+          tarefas.push(tarefa);
+        });
       }
+    } else if (processo === "SCANC" || processo === "Apuração") {
+      const estadoBase = estados[0] || "";
 
-      try {
-        let tarefas = [];
+      if (filiais.length === 0) {
+        const tarefasBase = await buscarTarefas(processo, estadoBase, null);
 
-        for (const estado of estados) {
-          const filial = filiais[0] || null;
-          const tarefasAPI = await buscarTarefas(processo, estado, filial);
+        tarefasBase.forEach(function (tarefa) {
+          tarefas.push(tarefa);
+        });
+      } else {
+        for (const filial of filiais) {
+          const tarefasFilial = await buscarTarefas(processo, estadoBase, filial);
 
-          tarefasAPI.forEach(function (tarefa) {
+          tarefasFilial.forEach(function (tarefa) {
             tarefas.push(tarefa);
           });
         }
+      }
+    } else {
+      for (const estado of estados) {
+        const filial = filiais[0] || null;
+        const tarefasAPI = await buscarTarefas(processo, estado, filial);
 
-        tarefasAtuais = tarefas;
-        renderizarChecklist(tarefasAtuais);
-        carregarProgressoChecklist();
-        ativarAutoSave();
-      } catch (erro) {
-        console.error("Erro ao carregar checklist:", erro);
-        alert("Erro ao carregar checklist.");
+        tarefasAPI.forEach(function (tarefa) {
+          tarefas.push(tarefa);
+        });
       }
     }
+
+    const tarefasUnicas = [];
+    const chavesJaAdicionadas = new Set();
+
+    tarefas.forEach(function (tarefa) {
+      const chave = tarefa.id
+        ? String(tarefa.id)
+        : `${tarefa.titulo}__${JSON.stringify(tarefa.instrucao || [])}`;
+
+      if (!chavesJaAdicionadas.has(chave)) {
+        chavesJaAdicionadas.add(chave);
+        tarefasUnicas.push(tarefa);
+      }
+    });
+
+    tarefasAtuais = tarefasUnicas;
+    renderizarChecklist(tarefasAtuais);
+    carregarProgressoChecklist();
+    ativarAutoSave();
+  } catch (erro) {
+    console.error("Erro ao carregar checklist:", erro);
+    alert("Erro ao carregar checklist.");
+  }
+}
 
     function renderizarChecklist(tarefas) {
       const container = document.getElementById("checklistContainer");
@@ -215,7 +271,9 @@
             </div>
 
             <div class="instruction-box" id="instrucao-${index}">
-              ${tarefa.instrucao.map((passo, i) => `${i + 1}. ${passo}`).join("<br>")}
+              ${tarefa.instrucao && tarefa.instrucao.length
+                ? tarefa.instrucao.map((passo, i) => `${i + 1}. ${passo}`).join("<br>")
+                : "Sem instruções cadastradas."}
             </div>
           </div>
         `;
@@ -238,29 +296,29 @@
     }
 
     async function validarChecklist() {
-  const checkboxes = document.querySelectorAll(".task-checkbox");
-  let todosMarcados = true;
+      const checkboxes = document.querySelectorAll(".task-checkbox");
+      let todosMarcados = true;
 
-  checkboxes.forEach(function (checkbox) {
-    if (!checkbox.checked) {
-      todosMarcados = false;
+      checkboxes.forEach(function (checkbox) {
+        if (!checkbox.checked) {
+          todosMarcados = false;
+        }
+      });
+
+      if (!todosMarcados || checkboxes.length === 0) {
+        document.getElementById("modal").style.display = "flex";
+        return;
+      }
+
+      try {
+        salvarProgressoChecklist();
+        await salvarFinalizacaoChecklist();
+        document.getElementById("modalSucesso").style.display = "flex";
+      } catch (erro) {
+        console.error("Erro ao salvar finalização:", erro);
+        alert("Erro ao salvar histórico no servidor.");
+      }
     }
-  });
-
-  if (!todosMarcados || checkboxes.length === 0) {
-    document.getElementById("modal").style.display = "flex";
-    return;
-  }
-
-  try {
-    salvarProgressoChecklist();
-    await salvarFinalizacaoChecklist();
-    document.getElementById("modalSucesso").style.display = "flex";
-  } catch (erro) {
-    console.error("Erro ao salvar finalização:", erro);
-    alert("Erro ao salvar histórico no servidor.");
-  }
-}
 
     function fecharModal() {
       document.getElementById("modal").style.display = "none";
@@ -278,7 +336,6 @@
       montarResumo();
       carregarChecklist();
     }
-    
   </script>
 </body>
 </html>

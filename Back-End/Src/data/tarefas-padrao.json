@@ -1,0 +1,288 @@
+{
+  "SPED": [
+    {
+      "id": "SPED-001",
+      "titulo": "Tax Analyser - Conferência e justificativa dos cruzamentos",
+      "instrucao": []
+    },
+    {
+      "id": "SPED-002",
+      "titulo": "E110 (Apuração ICMS) - Conferência da apuração e valor credor/devedor",
+      "instrucao": []
+    },
+    {
+      "id": "SPED-003",
+      "titulo": "E210 (Apuração ICMS ST) - Conferência da apuração e valor credor/devedor",
+      "instrucao": []
+    },
+    {
+      "id": "SPED-004",
+      "titulo": "E500 (Apuração IPI) - Validar apuração zerada",
+      "instrucao": []
+    },
+    {
+      "id": "SPED-005",
+      "titulo": "0150 - Tabela de cadastro do participante - Campo 07",
+      "instrucao": []
+    },
+    {
+      "id": "SPED-006",
+      "titulo": "0175 - Alteração da Tabela de Cadastro de Participante - Campo 03",
+      "instrucao": []
+    },
+    {
+      "id": "SPED-007",
+      "titulo": "1100 - Registro de Informações Sobre Exportação - Averbação Exportação no Mês",
+      "instrucao": []
+    },
+    {
+      "id": "SPED-008",
+      "titulo": "K200 - Estoque escriturado - Conferir quantidade em estoque (SAP x TXT)",
+      "instrucao": []
+    },
+    {
+      "id": "SPED-009",
+      "titulo": "H005 - Conferir valores totais do inventário (SAP x TXT)",
+      "instrucao": []
+    },
+    {
+      "id": "SPED-010",
+      "titulo": "Bloco G - Conferir valores do Bloco G com o livro CIAP modelo C",
+      "instrucao": []
+    },
+    {
+      "id": "SPED-011",
+      "titulo": "Registro K010 - Deve ser apresentado com o indicador de tipo de leiaute 2 - leiaute restrito a saldos de estoque, exceto filiais de AM que deve ser o leiaute 1 - completo",
+      "instrucao": []
+    },
+    {
+      "id": "SPED-012",
+      "titulo": "Caso apresente erro no código de participante do bloco H, gerar o relatório de Erro do SIG “Erro CNPJ Emitente x Fornecedor Modelo 7 – Armazenagem” para capturar o código do participante através do código do produto",
+      "instrucao": []
+    },
+    {
+      "id": "SPED-013",
+      "titulo": "Conferir existência da IE-ST PA e preencher registros 0015 e E200",
+      "instrucao": []
+    },
+    {
+      "id": "SPED-014",
+      "titulo": "E220 - Se houver ICMS-ST recolhido por operação (ICMS-ST antecipado) para o RJ lançar o valor do ICMS-ST recolhido no E220 com código RJ140007 e RJ150007 e preencher os registros E230 e E240",
+      "instrucao": []
+    },
+    {
+      "id": "SPED-015",
+      "titulo": "Se houver DIFAL para consumidor final não contribuinte (destino RJ) lançar valor no E311 nos códigos RJ240001 e RJ250001 e o FECP nos códigos RJ340001 e RJ350001 e preencher E313",
+      "instrucao": []
+    }
+  ],
+  "SCANC": [
+    {
+      "id": "SCANC-001",
+      "titulo": "SIG Sequenciamento - Correções base",
+      "instrucao": []
+    },
+    {
+      "id": "SCANC-002",
+      "titulo": "SIG Sequenciamento - Proporção",
+      "instrucao": []
+    },
+    {
+      "id": "SCANC-003",
+      "titulo": "SIG Sequenciamento - Contato via e-mail com dependentes",
+      "instrucao": []
+    },
+    {
+      "id": "SCANC-004",
+      "titulo": "Gerar razoabilidade - Verificar pendências e justificar erros",
+      "instrucao": []
+    },
+    {
+      "id": "SCANC-005",
+      "titulo": "Conferência Monofasia - Verificar alíquota ADREM no Anexo I",
+      "instrucao": []
+    },
+    {
+      "id": "SCANC-006",
+      "titulo": "Conferência Monofasia - Relatório Consulta Quantidade",
+      "instrucao": []
+    },
+    {
+      "id": "SCANC-007",
+      "titulo": "Imposto 41 e 36 - Conferir planilha consolidada",
+      "instrucao": []
+    },
+    {
+      "id": "SCANC-008",
+      "titulo": "Ferramenta avaliação de estoque - Apurar perda ou ganho",
+      "instrucao": []
+    },
+    {
+      "id": "SCANC-009",
+      "titulo": "Pagamento Antecipado ICMS Monofásico - Solicitar restituição para a célula",
+      "instrucao": []
+    },
+    {
+      "id": "SCANC-010",
+      "titulo": "Validar se houve a captura do CNPJ dos clientes - quadro 4.2 (Anexo III e V)",
+      "instrucao": []
+    },
+    {
+      "id": "SCANC-011",
+      "titulo": "Documentação Suporte - SGT",
+      "instrucao": []
+    }
+  ],
+  "Apuração": [
+    {
+      "id": "AP-001",
+      "titulo": "Geração dos relatórios de pendência do SIG Fiscal (RAZOABILIDADE)",
+      "instrucao": []
+    },
+    {
+      "id": "AP-002",
+      "titulo": "Conferência do Relatório de Conferência de Cálculo PMPF x MVA no ST das saídas internas e interestaduais",
+      "instrucao": []
+    },
+    {
+      "id": "AP-003",
+      "titulo": "Conferir se Apuração de IPI está com valores zerados",
+      "instrucao": []
+    },
+    {
+      "id": "AP-004",
+      "titulo": "Gerar Apuração de ICMS, ICMS ST e IPI e verificar valores",
+      "instrucao": []
+    },
+    {
+      "id": "AP-005",
+      "titulo": "Criação dos ajustes de contabilização da 2ª rotina",
+      "instrucao": []
+    },
+    {
+      "id": "AP-006",
+      "titulo": "Dispêndio ALL & BRF",
+      "instrucao": []
+    },
+    {
+      "id": "AP-007",
+      "titulo": "Avaliar cenário de recobrança de ativos, ajustes em conta gráfica e baixa em CIAP",
+      "instrucao": []
+    },
+    {
+      "id": "AP-008",
+      "titulo": "Conferir crédito de ICMS no CFOP 1.652/2.652 em operações de entrega futura HALC",
+      "instrucao": []
+    },
+    {
+      "id": "AP-009",
+      "titulo": "Extrair relatório Análise NF Alto Valor",
+      "instrucao": []
+    },
+    {
+      "id": "AP-010",
+      "titulo": "Verificar se houve pagamento de operações interestaduais com não contribuintes",
+      "instrucao": []
+    },
+    {
+      "id": "AP-011",
+      "titulo": "Contabilização de possíveis divergências no DIFAL",
+      "instrucao": []
+    },
+    {
+      "id": "AP-012",
+      "titulo": "Gerar Relatório Demonstrativo Cálculo Fundo Pobreza - Sergipe",
+      "instrucao": []
+    },
+    {
+      "id": "AP-013",
+      "titulo": "Conferência do preço nos processos de armazenagem",
+      "instrucao": []
+    },
+    {
+      "id": "AP-014",
+      "titulo": "Conferir existência e corrigir remessas para conserto intercompany",
+      "instrucao": []
+    },
+    {
+      "id": "AP-015",
+      "titulo": "Conferir existência e motivo do CFOP 1949/2949 e 5949/6949",
+      "instrucao": []
+    },
+    {
+      "id": "AP-016",
+      "titulo": "Análise da variação da apuração do imposto (Relatório Gerencial)",
+      "instrucao": []
+    },
+    {
+      "id": "AP-017",
+      "titulo": "Conferir cálculo e apurar o DIFAL",
+      "instrucao": []
+    },
+    {
+      "id": "AP-018",
+      "titulo": "DIFAL: SHELL WATER DETECTOR UF de origem RJ, calcular DIFAL com alíquota cheia",
+      "instrucao": []
+    },
+    {
+      "id": "AP-019",
+      "titulo": "DIFAL NF 949: recolher DIFAL exceto quando já tributou ST",
+      "instrucao": []
+    },
+    {
+      "id": "AP-020",
+      "titulo": "Verificar débitos indevidos de ICMS - análise por CFOP",
+      "instrucao": []
+    },
+    {
+      "id": "AP-021",
+      "titulo": "Conclusão da análise do relatório Consulta Completa - NF Entrada / NF Saída",
+      "instrucao": []
+    },
+    {
+      "id": "AP-022",
+      "titulo": "Conferência do relatório Produto Alíquota - Entrada e Produto Alíquota - Saída no SIG Fiscal",
+      "instrucao": []
+    },
+    {
+      "id": "AP-023",
+      "titulo": "Conferir a base de cálculo do ICMS ST dos produtos conforme legislação vigente",
+      "instrucao": []
+    },
+    {
+      "id": "AP-024",
+      "titulo": "Gerar relatórios para SOX e realizar upload dos documentos no SGT",
+      "instrucao": []
+    },
+    {
+      "id": "AP-025",
+      "titulo": "Verificar pagamentos antecipados para os ajustes necessários em conta gráfica ou restituição",
+      "instrucao": []
+    },
+    {
+      "id": "AP-026",
+      "titulo": "Conferência do CIAP do SATI - verificar coeficiente de creditamento calculado",
+      "instrucao": []
+    },
+    {
+      "id": "AP-027",
+      "titulo": "Verificar alteração de alíquota com efeito retroativo e apurar os impactos de acordo com legislação do Estado",
+      "instrucao": []
+    },
+    {
+      "id": "AP-028",
+      "titulo": "Análise das notas inutilizadas no período - PW x Sefaz",
+      "instrucao": []
+    },
+    {
+      "id": "AP-029",
+      "titulo": "Em caso de estorno de nota fiscal de entrada no livro, exceto notas duplicadas, enviar e-mail para as responsáveis do DASH",
+      "instrucao": []
+    },
+    {
+      "id": "AP-030",
+      "titulo": "Encerrar filial, apurar e emitir guias para recolhimento",
+      "instrucao": []
+    }
+  ]
+}

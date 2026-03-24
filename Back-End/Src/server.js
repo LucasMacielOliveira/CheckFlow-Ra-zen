@@ -18,6 +18,16 @@ const pastaData = path.join(__dirname, "data");
 const caminhoHistorico = path.join(pastaData, "historico.json");
 const caminhoTarefas = path.join(pastaData, "tarefas.json");
 
+
+const caminhoTarefasPadrao = path.join(pastaData, "tarefas-padrao.json");
+
+function lerTarefasPadrao() {
+  if (!fs.existsSync(caminhoTarefasPadrao)) {
+    fs.writeFileSync(caminhoTarefasPadrao, JSON.stringify({}, null, 2));
+  }
+
+  return JSON.parse(fs.readFileSync(caminhoTarefasPadrao, "utf-8"));
+}
 /*  UTILS  */
 
 function garantirArquivo(caminho) {
@@ -82,21 +92,45 @@ app.get("/filiais", (req, res) => {
 app.get("/tarefas", (req, res) => {
   const { processo, estado, filial } = req.query;
 
-  if (!processo || !estado) {
-    return res.status(400).json({ erro: "Processo e estado são obrigatórios." });
+  if (!processo) {
+    return res.status(400).json({ erro: "Processo é obrigatório." });
   }
 
-  const tarefas = lerTarefas();
+  const tarefasPadrao = lerTarefasPadrao();
+  const tarefasExtras = lerTarefas();
 
-  const filtradas = tarefas.filter(t => {
-    return (
-      t.processo === processo &&
-      t.estado === estado &&
-      (!t.filial || t.filial === filial)
-    );
+  const padrao = tarefasPadrao[processo] || [];
+  let extras = [];
+
+  if (processo === "SPED") {
+    extras = tarefasExtras.filter((t) => {
+      return t.processo === processo && t.estado === estado;
+    });
+  }
+
+  if (processo === "SCANC" || processo === "Apuração") {
+    extras = tarefasExtras.filter((t) => {
+      return t.processo === processo && t.filial === filial;
+    });
+  }
+
+  const todas = [...padrao, ...extras];
+
+  const unicas = [];
+  const idsJaAdicionados = new Set();
+
+  todas.forEach((tarefa) => {
+    const chave = tarefa.id
+      ? String(tarefa.id)
+      : `${tarefa.processo || ""}-${tarefa.estado || ""}-${tarefa.filial || ""}-${tarefa.titulo || ""}`;
+
+    if (!idsJaAdicionados.has(chave)) {
+      idsJaAdicionados.add(chave);
+      unicas.push(tarefa);
+    }
   });
 
-  res.json(filtradas);
+  res.json(unicas);
 });
 
 /*  HISTÓRICO  */
