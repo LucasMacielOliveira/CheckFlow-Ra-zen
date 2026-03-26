@@ -157,3 +157,19 @@ async function excluirTarefaAPI(id) {
 
   return await response.json();
 }
+
+async function atualizarTarefaAPI(id, tarefa) {
+  const response = await fetch(`${API_BASE_URL}/admin/tarefas/${encodeURIComponent(id)}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(tarefa)
+  });
+
+  if (!response.ok) {
+    throw new Error("Erro ao atualizar tarefa");
+  }
+
+  return await response.json();
+}

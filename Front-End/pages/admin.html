@@ -2,12 +2,14 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CheckFlow - Admin</title>
   <link rel="stylesheet" href="../CSS/style.css">
 </head>
 <body>
   <div class="page">
-    <div class="card card-history">
+    <div class="card admin-card">
+
       <div class="logo">
         <img src="../assets/checkflow-logo.png" alt="CheckFlow">
       </div>
@@ -15,15 +17,16 @@
       <div class="history-header">
         <div class="subtitle no-margin">Painel Admin</div>
         <p class="history-description">
-          Cadastre, visualize e exclua tarefas do sistema.
+          Cadastre, visualize, edite e exclua tarefas complementares do sistema.
         </p>
       </div>
 
       <div class="admin-layout">
-        <div class="admin-form-card">
+
+        <section class="admin-form-card">
           <h3 class="selection-title">Nova tarefa</h3>
 
-          <label class="admin-label">Processo</label>
+          <label for="processo" class="admin-label">Processo</label>
           <select id="processo" class="input">
             <option value="">Selecione</option>
             <option value="Apuração">Apuração</option>
@@ -31,20 +34,25 @@
             <option value="SCANC">SCANC</option>
           </select>
 
-          <label class="admin-label">Estado</label>
+          <label for="estado" class="admin-label">Estado</label>
           <select id="estado" class="input">
             <option value="">Selecione</option>
           </select>
 
-          <label class="admin-label">Filial</label>
+          <label for="filial" class="admin-label">Filial</label>
           <select id="filial" class="input">
             <option value="">Sem filial específica</option>
           </select>
 
-          <label class="admin-label">Título da tarefa</label>
-          <input id="titulo" class="input" type="text" placeholder="Ex.: Gerar arquivo SPED" />
+          <label for="titulo" class="admin-label">Título da tarefa</label>
+          <input
+            id="titulo"
+            class="input"
+            type="text"
+            placeholder="Ex.: Validar obrigação estadual"
+          >
 
-          <label class="admin-label">Instruções</label>
+          <label for="instrucao" class="admin-label">Instruções</label>
           <textarea
             id="instrucao"
             class="input admin-textarea"
@@ -52,20 +60,74 @@
           ></textarea>
 
           <div class="admin-actions">
-            <button class="button" onclick="salvarTarefa()">Salvar tarefa</button>
-          </div>
-        </div>
+            <button
+              id="botaoSalvarTarefa"
+              class="button"
+              type="button"
+              onclick="salvarTarefa()"
+            >
+              Salvar tarefa
+            </button>
 
-        <div class="admin-list-card">
+            <button
+              class="secondary-button small-button"
+              type="button"
+              onclick="limparFormularioAdmin()"
+            >
+              Cancelar edição
+            </button>
+          </div>
+        </section>
+
+        <section class="admin-list-card">
           <div class="admin-list-header">
             <h3 class="selection-title">Tarefas cadastradas</h3>
-            <button class="secondary-button small-button" onclick="carregarTarefasAdminTela()">
+
+            <button
+              class="secondary-button small-button"
+              type="button"
+              onclick="carregarTarefasAdminTela()"
+            >
               Atualizar
             </button>
           </div>
 
-          <div id="listaTarefasAdmin" class="history-list"></div>
-        </div>
+          <div class="admin-filters">
+            <select id="filtroProcesso" class="input">
+              <option value="">Todos os processos</option>
+              <option value="Apuração">Apuração</option>
+              <option value="SPED">SPED</option>
+              <option value="SCANC">SCANC</option>
+            </select>
+
+            <select id="filtroEstado" class="input">
+              <option value="">Todos os estados</option>
+            </select>
+
+            <input
+              id="filtroFilial"
+              class="input"
+              type="text"
+              placeholder="Filtrar por filial"
+            >
+
+            <input
+              id="filtroTexto"
+              class="input"
+              type="text"
+              placeholder="Buscar por título"
+            >
+          </div>
+
+          <div id="listaTarefasAdmin" class="history-list">
+            <div class="empty-history">
+              <div class="empty-history-icon">📋</div>
+              <h3>Carregando tarefas...</h3>
+              <p>Aguarde enquanto buscamos os dados.</p>
+            </div>
+          </div>
+        </section>
+
       </div>
 
       <div class="footer-brand">

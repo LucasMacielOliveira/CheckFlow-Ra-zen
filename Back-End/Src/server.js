@@ -133,6 +133,7 @@ app.get("/tarefas", (req, res) => {
   res.json(unicas);
 });
 
+
 /*  HISTÓRICO  */
 
 app.get("/historico", (req, res) => {
@@ -205,6 +206,31 @@ app.delete("/admin/tarefas/:id", (req, res) => {
   res.json({ mensagem: "Tarefa excluída" });
 });
 
+app.put("/admin/tarefas/:id", (req, res) => {
+  const { id } = req.params;
+  const dadosAtualizados = req.body;
+
+  if (!dadosAtualizados || !dadosAtualizados.titulo) {
+    return res.status(400).json({ erro: "Dados inválidos" });
+  }
+
+  const tarefas = lerTarefas();
+  const indice = tarefas.findIndex((t) => String(t.id) === String(id));
+
+  if (indice === -1) {
+    return res.status(404).json({ erro: "Tarefa não encontrada" });
+  }
+
+  tarefas[indice] = {
+    ...tarefas[indice],
+    ...dadosAtualizados,
+    id: tarefas[indice].id
+  };
+
+  salvarTarefas(tarefas);
+
+  res.json(tarefas[indice]);
+});
 /*  START  */
 
 app.listen(PORT, () => {
