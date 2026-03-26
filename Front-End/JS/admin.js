@@ -91,6 +91,7 @@ function montarObjetoTarefaDoFormulario() {
   const filial = document.getElementById("filial").value || "";
   const titulo = document.getElementById("titulo").value.trim();
   const instrucaoTexto = document.getElementById("instrucao").value.trim();
+  const usuarioLogado = localStorage.getItem("usuarioLogado") || "desconhecido";
 
   if (!processo || !estado || !titulo || !instrucaoTexto) {
     alert("Preencha processo, estado, título e instruções.");
@@ -116,7 +117,9 @@ function montarObjetoTarefaDoFormulario() {
     estado,
     filial: processo === "SPED" ? "" : filial,
     titulo,
-    instrucao
+    instrucao,
+    atualizadoPor: usuarioLogado,
+    criadoPor: usuarioLogado
   };
 }
 

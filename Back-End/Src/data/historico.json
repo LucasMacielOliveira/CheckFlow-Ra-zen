@@ -1,5 +1,81 @@
 [
   {
+    "id": "1774547265991",
+    "processo": "SPED",
+    "competencia": "2026-03",
+    "estados": [
+      "São Paulo"
+    ],
+    "filiais": [],
+    "usuario": "Lucas Maciel",
+    "finalizadoEm": "26/03/2026, 14:47:45",
+    "status": "finalizado",
+    "totalTarefas": 15,
+    "concluidas": 15,
+    "tarefas": [
+      {
+        "titulo": "Tax Analyser - Conferência e justificativa dos cruzamentos",
+        "concluida": true
+      },
+      {
+        "titulo": "E110 (Apuração ICMS) - Conferência da apuração e valor credor/devedor",
+        "concluida": true
+      },
+      {
+        "titulo": "E210 (Apuração ICMS ST) - Conferência da apuração e valor credor/devedor",
+        "concluida": true
+      },
+      {
+        "titulo": "E500 (Apuração IPI) - Validar apuração zerada",
+        "concluida": true
+      },
+      {
+        "titulo": "0150 - Tabela de cadastro do participante - Campo 07",
+        "concluida": true
+      },
+      {
+        "titulo": "0175 - Alteração da Tabela de Cadastro de Participante - Campo 03",
+        "concluida": true
+      },
+      {
+        "titulo": "1100 - Registro de Informações Sobre Exportação - Averbação Exportação no Mês",
+        "concluida": true
+      },
+      {
+        "titulo": "K200 - Estoque escriturado - Conferir quantidade em estoque (SAP x TXT)",
+        "concluida": true
+      },
+      {
+        "titulo": "H005 - Conferir valores totais do inventário (SAP x TXT)",
+        "concluida": true
+      },
+      {
+        "titulo": "Bloco G - Conferir valores do Bloco G com o livro CIAP modelo C",
+        "concluida": true
+      },
+      {
+        "titulo": "Registro K010 - Deve ser apresentado com o indicador de tipo de leiaute 2 - leiaute restrito a saldos de estoque, exceto filiais de AM que deve ser o leiaute 1 - completo",
+        "concluida": true
+      },
+      {
+        "titulo": "Caso apresente erro no código de participante do bloco H, gerar o relatório de Erro do SIG “Erro CNPJ Emitente x Fornecedor Modelo 7 – Armazenagem” para capturar o código do participante através do código do produto",
+        "concluida": true
+      },
+      {
+        "titulo": "Conferir existência da IE-ST PA e preencher registros 0015 e E200",
+        "concluida": true
+      },
+      {
+        "titulo": "E220 - Se houver ICMS-ST recolhido por operação (ICMS-ST antecipado) para o RJ lançar o valor do ICMS-ST recolhido no E220 com código RJ140007 e RJ150007 e preencher os registros E230 e E240",
+        "concluida": true
+      },
+      {
+        "titulo": "Se houver DIFAL para consumidor final não contribuinte (destino RJ) lançar valor no E311 nos códigos RJ240001 e RJ250001 e o FECP nos códigos RJ340001 e RJ350001 e preencher E313",
+        "concluida": true
+      }
+    ]
+  },
+  {
     "id": "1774461498018",
     "processo": "Apuração",
     "competencia": "2026-03",

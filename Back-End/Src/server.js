@@ -185,14 +185,21 @@ app.post("/admin/tarefas", (req, res) => {
   }
 
   const tarefas = lerTarefas();
+  const agora = new Date().toLocaleString("pt-BR");
 
-  nova.id = String(Date.now());
+  const tarefaCompleta = {
+    ...nova,
+    id: String(Date.now()),
+    criadoPor: nova.criadoPor || "sistema",
+    criadoEm: agora,
+    atualizadoPor: nova.criadoPor || "sistema",
+    atualizadoEm: agora
+  };
 
-  tarefas.push(nova);
-
+  tarefas.push(tarefaCompleta);
   salvarTarefas(tarefas);
 
-  res.status(201).json(nova);
+  res.status(201).json(tarefaCompleta);
 });
 
 app.delete("/admin/tarefas/:id", (req, res) => {
@@ -221,10 +228,17 @@ app.put("/admin/tarefas/:id", (req, res) => {
     return res.status(404).json({ erro: "Tarefa não encontrada" });
   }
 
+  const tarefaAnterior = tarefas[indice];
+  const agora = new Date().toLocaleString("pt-BR");
+
   tarefas[indice] = {
-    ...tarefas[indice],
+    ...tarefaAnterior,
     ...dadosAtualizados,
-    id: tarefas[indice].id
+    id: tarefaAnterior.id,
+    criadoPor: tarefaAnterior.criadoPor || "sistema",
+    criadoEm: tarefaAnterior.criadoEm || agora,
+    atualizadoPor: dadosAtualizados.atualizadoPor || "sistema",
+    atualizadoEm: agora
   };
 
   salvarTarefas(tarefas);
