@@ -314,10 +314,9 @@ function registrarEventosFiltros() {
 }
 
 document.addEventListener("DOMContentLoaded", async function () {
-  if (!exigirLogin() || !exigirArea()) {
-    return;
-  }
-
+  if (!exigirLogin() || !exigirArea() || !exigirAdmin()) {
+  return;
+}
   atualizarTextoBotaoAdmin();
   registrarEventosFiltros();
   await carregarEstadosAdmin();

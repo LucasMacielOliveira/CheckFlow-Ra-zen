@@ -199,7 +199,7 @@ app.delete("/admin/tarefas/:id", (req, res) => {
   const { id } = req.params;
 
   let tarefas = lerTarefas();
-  tarefas = tarefas.filter(t => String(t.id) !== String(id));
+  tarefas = tarefas.filter((t) => String(t.id) !== String(id));
 
   salvarTarefas(tarefas);
 

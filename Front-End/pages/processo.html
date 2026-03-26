@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>CheckFlow - Processo</title>
-  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../CSS/style.css">
 </head>
 <body>
   <div class="page">
@@ -19,6 +19,15 @@
         <button class="secondary-button" onclick="selecionarProcesso('SPED')">SPED</button>
         <button class="secondary-button" onclick="selecionarProcesso('SCANC')">SCANC</button>
         <button class="history-nav-button" onclick="irParaHistorico()">Ver histórico</button>
+
+        <button
+          id="botaoAdmin"
+          class="secondary-button"
+          style="display: none;"
+          onclick="irParaAdmin()"
+        >
+          Painel Admin
+        </button>
       </div>
 
       <div class="footer-brand">
@@ -27,9 +36,9 @@
     </div>
   </div>
 
-  <script src="../js/storage.js"></script>
-  <script src="../js/auth.js"></script>
-  <script src="../js/processos.js"></script>
+  <script src="../JS/storage.js"></script>
+  <script src="../JS/auth.js"></script>
+  <script src="../JS/processos.js"></script>
   <script>
     function selecionarProcesso(processo) {
       if (!exigirLogin() || !exigirArea()) {
@@ -57,8 +66,28 @@
       window.location.href = "historico.html";
     }
 
-    exigirLogin();
-    exigirArea();
+    function irParaAdmin() {
+      if (!exigirLogin() || !exigirArea() || !exigirAdmin()) {
+        return;
+      }
+
+      window.location.href = "admin.html";
+    }
+
+    function mostrarBotaoAdminSeNecessario() {
+      const perfil = localStorage.getItem("perfilUsuario");
+      const botaoAdmin = document.getElementById("botaoAdmin");
+
+      if (perfil === "admin") {
+        botaoAdmin.style.display = "block";
+      } else {
+        botaoAdmin.style.display = "none";
+      }
+    }
+
+    if (exigirLogin() && exigirArea()) {
+      mostrarBotaoAdminSeNecessario();
+    }
   </script>
 </body>
 </html>

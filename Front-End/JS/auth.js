@@ -33,3 +33,21 @@ function exigirProcesso() {
 
   return true;
 }
+
+function obterPerfilUsuario() {
+  return localStorage.getItem("perfilUsuario")
+  }
+
+  function exigirAdmin (){
+
+    const perfil = obterPerfilUsuario();
+
+    if (perfil !== "admin") {
+      alert("Acesso negado. Esta página é restrita a administradores.");
+      window.location.href = "index.html";
+      return false;
+    }
+
+    return true
+    
+  }
