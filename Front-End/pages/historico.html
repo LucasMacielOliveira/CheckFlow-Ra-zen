@@ -5,6 +5,9 @@
   <title>CheckFlow - Histórico</title>
   <link rel="stylesheet" href="../css/style.css">
 </head>
+
+<div id="toastContainer" class="toast-container"></div>
+
 <body>
   <div class="page">
     <div class="card card-history">
@@ -20,11 +23,24 @@
       </div>
 
       <div class="history-actions">
-        <button class="secondary-button small-button" onclick="voltarParaProcessos()">Voltar</button>
-        <button class="danger-outline-button small-button" onclick="confirmarLimparHistorico()">Limpar histórico</button>
+        <button class="secondary-button small-button" type="button" onclick="voltarChecklist()">
+          Voltar
+        </button>
+        <button
+          id="btnLimparHistorico"
+          class="danger-outline-button small-button"
+          type="button"
+        >
+          Limpar histórico
+        </button>
       </div>
 
-      <div id="historicoLista" class="history-list"></div>
+     <div id="loadingHistorico" class="loading-state" style="display: none;">
+        <div class="loading-spinner"></div>
+        <span>Carregando histórico...</span>
+      </div>
+
+      <div id="historyList" class="history-list"></div>
 
       <div class="footer-brand">
         <img src="../assets/raizen-logo.png" alt="Raízen">
@@ -37,24 +53,25 @@
       <h3>Confirmar exclusão</h3>
       <p id="textoConfirmacao">Deseja realmente excluir este registro?</p>
       <div class="modal-actions">
-        <button onclick="fecharModalConfirmacao()">Cancelar</button>
-        <button class="danger-button" onclick="executarAcaoConfirmada()">Excluir</button>
+        <button id="btnCancelarExclusao" type="button">Cancelar</button>
+        <button id="btnConfirmarExclusao" class="danger-button" type="button">
+          Excluir
+        </button>
       </div>
     </div>
   </div>
-  
- <div id="modalDetalhes" class="modal">
-  <div class="modal-content">
-    <h3>Detalhes do Checklist</h3>
-    <div id="conteudoDetalhes"></div>
-    <button onclick="fecharModalDetalhes()">Fechar</button>
-  </div>
-</div>
-  
-  <script src="../JS/storage.js"></script>
-<script src="../JS/auth.js"></script>
-<script src="../JS/api.js"></script>
-<script src="../JS/historico.js"></script>
 
+  <div id="modalDetalhes" class="modal">
+    <div class="modal-content">
+      <h3>Detalhes do Checklist</h3>
+      <div id="conteudoDetalhes"></div>
+      <button id="btnFecharDetalhes" type="button">Fechar</button>
+    </div>
+  </div>
+
+  <script src="../JS/storage.js"></script>
+  <script src="../JS/auth.js"></script>
+  <script src="../JS/api.js"></script>
+  <script src="../JS/historico.js"></script>
 </body>
 </html>

@@ -1,42 +1,89 @@
-let tarefaEmEdicao = null;
 let tarefasAdminCache = [];
+let tarefaEmEdicaoId = null;
+
+function normalizarTexto(valor) {
+  return String(valor || "").trim();
+}
+
+function normalizarListaInstrucao(texto) {
+  return String(texto || "")
+    .split("\n")
+    .map((linha) => linha.trim())
+    .filter(Boolean);
+}
+
+function escaparHtml(texto) {
+  return String(texto ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function obterElementosAdmin() {
+  return {
+    processo: document.getElementById("processo"),
+    estado: document.getElementById("estado"),
+    filial: document.getElementById("filial"),
+    titulo: document.getElementById("titulo"),
+    instrucao: document.getElementById("instrucao"),
+    filtroProcesso: document.getElementById("filtroProcesso"),
+    filtroEstado: document.getElementById("filtroEstado"),
+    filtroFilial: document.getElementById("filtroFilial"),
+    lista: document.getElementById("listaTarefas"),
+    secaoFilial: document.getElementById("campoFilial"),
+    btnSalvar: document.getElementById("btnSalvar"),
+    btnCancelarEdicao: document.getElementById("btnCancelarEdicao")
+  };
+}
+
+function processoExigeFilial(processo) {
+  return processo === "SCANC" || processo === "Apuração";
+}
+
+function processoExigeEstado(processo) {
+  return processo === "SPED" || processo === "SCANC" || processo === "Apuração";
+}
 
 async function carregarEstadosAdmin() {
+  const { estado, filtroEstado } = obterElementosAdmin();
+
   try {
     const estados = await buscarEstados();
 
-    const selectEstado = document.getElementById("estado");
-    const filtroEstado = document.getElementById("filtroEstado");
+    if (estado) {
+      estado.innerHTML = `<option value="">Selecione o estado</option>`;
+      estados.forEach((uf) => {
+        estado.innerHTML += `<option value="${escaparHtml(uf)}">${escaparHtml(uf)}</option>`;
+      });
+    }
 
-    selectEstado.innerHTML = `<option value="">Selecione</option>`;
-    filtroEstado.innerHTML = `<option value="">Todos os estados</option>`;
-
-    estados.forEach(function (estado) {
-      selectEstado.innerHTML += `<option value="${estado}">${estado}</option>`;
-      filtroEstado.innerHTML += `<option value="${estado}">${estado}</option>`;
-    });
+    if (filtroEstado) {
+      filtroEstado.innerHTML = `<option value="">Todos os estados</option>`;
+      estados.forEach((uf) => {
+        filtroEstado.innerHTML += `<option value="${escaparHtml(uf)}">${escaparHtml(uf)}</option>`;
+      });
+    }
   } catch (erro) {
     console.error("Erro ao carregar estados:", erro);
     alert("Erro ao carregar estados.");
   }
 }
 
-async function carregarFiliaisAdmin(valorSelecionado = "") {
-  const estado = document.getElementById("estado").value;
-  const selectFilial = document.getElementById("filial");
+async function carregarFiliaisAdmin(estadoSelecionado, selectId = "filial", placeholder = "Selecione a filial") {
+  const select = document.getElementById(selectId);
+  if (!select) return;
 
-  selectFilial.innerHTML = `<option value="">Sem filial específica</option>`;
+  select.innerHTML = `<option value="">${placeholder}</option>`;
 
-  if (!estado) {
-    return;
-  }
+  if (!estadoSelecionado) return;
 
   try {
-    const filiais = await buscarFiliaisPorEstado(estado);
+    const filiais = await buscarFiliaisPorEstado(estadoSelecionado);
 
-    filiais.forEach(function (filial) {
-      const selected = filial === valorSelecionado ? "selected" : "";
-      selectFilial.innerHTML += `<option value="${filial}" ${selected}>${filial}</option>`;
+    filiais.forEach((filial) => {
+      select.innerHTML += `<option value="${escaparHtml(filial)}">${escaparHtml(filial)}</option>`;
     });
   } catch (erro) {
     console.error("Erro ao carregar filiais:", erro);
@@ -44,285 +91,349 @@ async function carregarFiliaisAdmin(valorSelecionado = "") {
   }
 }
 
-function atualizarTextoBotaoAdmin() {
-  const botao = document.getElementById("botaoSalvarTarefa");
+function aplicarRegraProcesso() {
+  const { processo, estado, filial, secaoFilial } = obterElementosAdmin();
+  const processoSelecionado = normalizarTexto(processo?.value);
 
-  if (!botao) {
-    return;
+  if (!processo || !estado || !filial || !secaoFilial) return;
+
+  if (processoExigeEstado(processoSelecionado)) {
+    estado.disabled = false;
+  } else {
+    estado.value = "";
+    estado.disabled = true;
   }
 
-  botao.textContent = tarefaEmEdicao ? "Atualizar tarefa" : "Salvar tarefa";
-}
-
-function aplicarRegraProcesso() {
-  const processo = document.getElementById("processo").value;
-  const estado = document.getElementById("estado");
-  const filial = document.getElementById("filial");
-
-  if (processo === "SPED") {
-    estado.disabled = false;
-    filial.disabled = true;
-    filial.value = "";
-  } else if (processo === "SCANC" || processo === "Apuração") {
-    estado.disabled = false;
+  if (processoExigeFilial(processoSelecionado)) {
+    secaoFilial.style.display = "block";
     filial.disabled = false;
   } else {
-    estado.disabled = false;
-    filial.disabled = false;
+    secaoFilial.style.display = "none";
+    filial.value = "";
+    filial.disabled = true;
   }
 }
 
 function limparFormularioAdmin() {
-  tarefaEmEdicao = null;
-
-  document.getElementById("processo").value = "";
-  document.getElementById("estado").value = "";
-  document.getElementById("filial").innerHTML = `<option value="">Sem filial específica</option>`;
-  document.getElementById("titulo").value = "";
-  document.getElementById("instrucao").value = "";
-
-  aplicarRegraProcesso();
-  atualizarTextoBotaoAdmin();
-}
-
-function montarObjetoTarefaDoFormulario() {
-  const processo = document.getElementById("processo").value;
-  const estado = document.getElementById("estado").value;
-  const filial = document.getElementById("filial").value || "";
-  const titulo = document.getElementById("titulo").value.trim();
-  const instrucaoTexto = document.getElementById("instrucao").value.trim();
-  const usuarioLogado = localStorage.getItem("usuarioLogado") || "desconhecido";
-
-  if (!processo || !estado || !titulo || !instrucaoTexto) {
-    alert("Preencha processo, estado, título e instruções.");
-    return null;
-  }
-
-  if ((processo === "SCANC" || processo === "Apuração") && !filial) {
-    alert("Para SCANC e Apuração, selecione a filial.");
-    return null;
-  }
-
-  const instrucao = instrucaoTexto
-    .split("\n")
-    .map(function (linha) {
-      return linha.trim();
-    })
-    .filter(function (linha) {
-      return linha !== "";
-    });
-
-  return {
+  const {
     processo,
     estado,
-    filial: processo === "SPED" ? "" : filial,
+    filial,
     titulo,
     instrucao,
-    atualizadoPor: usuarioLogado,
-    criadoPor: usuarioLogado
+    btnSalvar,
+    btnCancelarEdicao
+  } = obterElementosAdmin();
+
+  if (processo) processo.value = "";
+  if (estado) {
+    estado.value = "";
+    estado.disabled = false;
+  }
+  if (filial) {
+    filial.innerHTML = `<option value="">Selecione a filial</option>`;
+    filial.value = "";
+    filial.disabled = true;
+  }
+  if (titulo) titulo.value = "";
+  if (instrucao) instrucao.value = "";
+
+  if (btnSalvar) btnSalvar.textContent = "Salvar tarefa";
+  if (btnCancelarEdicao) btnCancelarEdicao.style.display = "none";
+
+  tarefaEmEdicaoId = null;
+  aplicarRegraProcesso();
+}
+
+function validarFormularioAdmin(dados) {
+  if (!dados.processo) {
+    throw new Error("Selecione o processo.");
+  }
+
+  if (processoExigeEstado(dados.processo) && !dados.estado) {
+    throw new Error("Selecione o estado.");
+  }
+
+  if (processoExigeFilial(dados.processo) && !dados.filial) {
+    throw new Error("Selecione a filial.");
+  }
+
+  if (!dados.titulo) {
+    throw new Error("Informe o título da tarefa.");
+  }
+
+  if (!dados.instrucao.length) {
+    throw new Error("Informe ao menos uma instrução.");
+  }
+}
+
+function coletarDadosFormularioAdmin() {
+  const { processo, estado, filial, titulo, instrucao } = obterElementosAdmin();
+
+  const dados = {
+    processo: normalizarTexto(processo?.value),
+    estado: normalizarTexto(estado?.value),
+    filial: normalizarTexto(filial?.value),
+    titulo: normalizarTexto(titulo?.value),
+    instrucao: normalizarListaInstrucao(instrucao?.value)
   };
+
+  validarFormularioAdmin(dados);
+  return dados;
 }
 
-async function salvarTarefa() {
-  const tarefa = montarObjetoTarefaDoFormulario();
+function filtrarTarefasAdmin() {
+  const { filtroProcesso, filtroEstado, filtroFilial } = obterElementosAdmin();
 
-  if (!tarefa) {
-    return;
-  }
+  const processo = normalizarTexto(filtroProcesso?.value);
+  const estado = normalizarTexto(filtroEstado?.value);
+  const filial = normalizarTexto(filtroFilial?.value);
 
-  try {
-    if (tarefaEmEdicao) {
-      await atualizarTarefaAPI(tarefaEmEdicao, tarefa);
-      alert("Tarefa atualizada com sucesso.");
-    } else {
-      await criarTarefaAPI(tarefa);
-      alert("Tarefa cadastrada com sucesso.");
-    }
-
-    limparFormularioAdmin();
-    await carregarTarefasAdminTela();
-  } catch (erro) {
-    console.error("Erro ao salvar tarefa:", erro);
-    alert("Erro ao salvar tarefa.");
-  }
-}
-
-async function editarTarefa(id) {
-  try {
-    const tarefas = await buscarTarefasAdmin();
-    const tarefa = tarefas.find(function (item) {
-      return String(item.id) === String(id);
-    });
-
-    if (!tarefa) {
-      alert("Tarefa não encontrada.");
-      return;
-    }
-
-    tarefaEmEdicao = tarefa.id;
-
-    document.getElementById("processo").value = tarefa.processo || "";
-    aplicarRegraProcesso();
-
-    document.getElementById("estado").value = tarefa.estado || "";
-    await carregarFiliaisAdmin(tarefa.filial || "");
-
-    document.getElementById("titulo").value = tarefa.titulo || "";
-    document.getElementById("instrucao").value = (tarefa.instrucao || []).join("\n");
-
-    atualizarTextoBotaoAdmin();
-
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth"
-    });
-  } catch (erro) {
-    console.error("Erro ao editar tarefa:", erro);
-    alert("Erro ao carregar dados da tarefa.");
-  }
-}
-
-async function excluirTarefa(id) {
-  const confirmar = confirm("Deseja realmente excluir esta tarefa?");
-
-  if (!confirmar) {
-    return;
-  }
-
-  try {
-    await excluirTarefaAPI(id);
-
-    if (String(tarefaEmEdicao) === String(id)) {
-      limparFormularioAdmin();
-    }
-
-    await carregarTarefasAdminTela();
-  } catch (erro) {
-    console.error("Erro ao excluir tarefa:", erro);
-    alert("Erro ao excluir tarefa.");
-  }
-}
-
-function obterTarefasFiltradas() {
-  const filtroProcesso = document.getElementById("filtroProcesso").value.trim().toLowerCase();
-  const filtroEstado = document.getElementById("filtroEstado").value.trim().toLowerCase();
-  const filtroFilial = document.getElementById("filtroFilial").value.trim().toLowerCase();
-  const filtroTexto = document.getElementById("filtroTexto").value.trim().toLowerCase();
-
-  return tarefasAdminCache.filter(function (tarefa) {
-    const processo = (tarefa.processo || "").toLowerCase();
-    const estado = (tarefa.estado || "").toLowerCase();
-    const filial = (tarefa.filial || "").toLowerCase();
-    const titulo = (tarefa.titulo || "").toLowerCase();
-
-    const matchProcesso = !filtroProcesso || processo === filtroProcesso;
-    const matchEstado = !filtroEstado || estado === filtroEstado;
-    const matchFilial = !filtroFilial || filial.includes(filtroFilial);
-    const matchTexto = !filtroTexto || titulo.includes(filtroTexto);
-
-    return matchProcesso && matchEstado && matchFilial && matchTexto;
+  return tarefasAdminCache.filter((tarefa) => {
+    if (processo && tarefa.processo !== processo) return false;
+    if (estado && tarefa.estado !== estado) return false;
+    if (filial && tarefa.filial !== filial) return false;
+    return true;
   });
 }
 
-function renderizarListaAdmin() {
-  const container = document.getElementById("listaTarefasAdmin");
-  const tarefas = obterTarefasFiltradas();
+function renderizarTarefasAdmin() {
+  const { lista } = obterElementosAdmin();
+  if (!lista) return;
 
-  if (!tarefas.length) {
-    container.innerHTML = `
-      <div class="empty-history">
-        <h3>Nenhuma tarefa encontrada</h3>
-        <p>Altere os filtros ou cadastre uma nova tarefa.</p>
-      </div>
-    `;
+  const tarefasFiltradas = filtrarTarefasAdmin();
+
+  if (!tarefasFiltradas.length) {
+    lista.innerHTML = `<div class="empty-state">Nenhuma tarefa encontrada.</div>`;
     return;
   }
 
-  let html = "";
+  lista.innerHTML = tarefasFiltradas
+    .map((tarefa) => {
+      const instrucoes = Array.isArray(tarefa.instrucao) ? tarefa.instrucao : [];
+      const instrucoesHtml = instrucoes.length
+        ? instrucoes.map((item) => `<div>${escaparHtml(item)}</div>`).join("")
+        : `<div>Sem instruções.</div>`;
 
-  tarefas
-    .slice()
-    .reverse()
-    .forEach(function (tarefa) {
-      html += `
-        <div class="history-card">
-          <div class="history-card-top">
-            <div>
-              <div class="history-processo">${tarefa.processo || "-"}</div>
-              <div class="history-date">${tarefa.titulo || "-"}</div>
-            </div>
-            <span class="status-badge success">Ativa</span>
-          </div>
-
-          <div class="history-grid">
-            <div class="history-info-box">
-              <span class="history-label">Estado</span>
-              <strong>${tarefa.estado || "-"}</strong>
-            </div>
-
-            <div class="history-info-box">
-              <span class="history-label">Filial</span>
-              <strong>${tarefa.filial || "Geral"}</strong>
-            </div>
-
-            <div class="history-info-box full-width">
-              <span class="history-label">Instruções</span>
-              <strong>${(tarefa.instrucao || []).join("<br>")}</strong>
-            </div>
-
-            <div class="history-info-box">
-              <span class="history-label">ID</span>
-              <strong>${tarefa.id || "-"}</strong>
+      return `
+        <div class="task-card" data-id="${escaparHtml(tarefa.id)}">
+          <div class="task-card-header">
+            <h3>${escaparHtml(tarefa.titulo)}</h3>
+            <div class="task-card-actions">
+              <button type="button" class="button secondary" onclick="editarTarefa('${escaparHtml(tarefa.id)}')">
+                Editar
+              </button>
+              <button type="button" class="button danger" onclick="excluirTarefa('${escaparHtml(tarefa.id)}')">
+                Excluir
+              </button>
             </div>
           </div>
 
-          <div class="history-card-actions">
-            <button class="secondary-button small-button" onclick="editarTarefa('${tarefa.id}')">
-              Editar
-            </button>
-            <button class="danger-outline-button small-button" onclick="excluirTarefa('${tarefa.id}')">
-              Excluir
-            </button>
+          <div class="task-card-meta">
+            <span><strong>Processo:</strong> ${escaparHtml(tarefa.processo || "-")}</span>
+            <span><strong>Estado:</strong> ${escaparHtml(tarefa.estado || "-")}</span>
+            <span><strong>Filial:</strong> ${escaparHtml(tarefa.filial || "-")}</span>
+          </div>
+
+          <div class="task-card-body">
+            <strong>Instruções:</strong>
+            <div class="instruction-list">
+              ${instrucoesHtml}
+            </div>
           </div>
         </div>
       `;
-    });
-
-  container.innerHTML = html;
+    })
+    .join("");
 }
 
-async function carregarTarefasAdminTela() {
+async function carregarTarefasAdmin() {
   try {
     tarefasAdminCache = await buscarTarefasAdmin();
-    renderizarListaAdmin();
+    renderizarTarefasAdmin();
   } catch (erro) {
-    console.error("Erro ao carregar tarefas admin:", erro);
+    console.error("Erro ao carregar tarefas administrativas:", erro);
     alert("Erro ao carregar tarefas.");
   }
 }
 
-function registrarEventosFiltros() {
-  document.getElementById("filtroProcesso").addEventListener("change", renderizarListaAdmin);
-  document.getElementById("filtroEstado").addEventListener("change", renderizarListaAdmin);
-  document.getElementById("filtroFilial").addEventListener("input", renderizarListaAdmin);
-  document.getElementById("filtroTexto").addEventListener("input", renderizarListaAdmin);
+async function salvarTarefaAdmin(event) {
+  if (event) event.preventDefault();
 
-  document.getElementById("processo").addEventListener("change", function () {
-    aplicarRegraProcesso();
-  });
+  try {
+    const dados = coletarDadosFormularioAdmin();
 
-  document.getElementById("estado").addEventListener("change", function () {
-    carregarFiliaisAdmin();
-  });
+    if (tarefaEmEdicaoId) {
+      const tarefaAtualizada = await atualizarTarefaAPI(tarefaEmEdicaoId, dados);
+
+      tarefasAdminCache = tarefasAdminCache.map((tarefa) =>
+        String(tarefa.id) === String(tarefaEmEdicaoId) ? tarefaAtualizada : tarefa
+      );
+
+      alert("Tarefa atualizada com sucesso.");
+    } else {
+      const novaTarefa = await criarTarefaAPI(dados);
+      tarefasAdminCache.push(novaTarefa);
+      alert("Tarefa cadastrada com sucesso.");
+    }
+
+    limparFormularioAdmin();
+    renderizarTarefasAdmin();
+  } catch (erro) {
+    console.error("Erro ao salvar tarefa:", erro);
+    alert(erro.message || "Erro ao salvar tarefa.");
+  }
 }
 
-document.addEventListener("DOMContentLoaded", async function () {
-  if (!exigirLogin() || !exigirArea() || !exigirAdmin()) {
-  return;
+async function editarTarefa(id) {
+  const tarefa = tarefasAdminCache.find((item) => String(item.id) === String(id));
+
+  if (!tarefa) {
+    alert("Tarefa não encontrada.");
+    return;
+  }
+
+  const {
+    processo,
+    estado,
+    filial,
+    titulo,
+    instrucao,
+    btnSalvar,
+    btnCancelarEdicao
+  } = obterElementosAdmin();
+
+  tarefaEmEdicaoId = tarefa.id;
+
+  if (processo) processo.value = tarefa.processo || "";
+  aplicarRegraProcesso();
+
+  if (estado) {
+    estado.value = tarefa.estado || "";
+  }
+
+  if (processoExigeFilial(tarefa.processo)) {
+    await carregarFiliaisAdmin(tarefa.estado, "filial", "Selecione a filial");
+    if (filial) filial.value = tarefa.filial || "";
+  }
+
+  if (titulo) titulo.value = tarefa.titulo || "";
+  if (instrucao) {
+    instrucao.value = Array.isArray(tarefa.instrucao)
+      ? tarefa.instrucao.join("\n")
+      : "";
+  }
+
+  if (btnSalvar) btnSalvar.textContent = "Atualizar tarefa";
+  if (btnCancelarEdicao) btnCancelarEdicao.style.display = "inline-flex";
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
-  atualizarTextoBotaoAdmin();
-  registrarEventosFiltros();
+
+async function excluirTarefa(id) {
+  const tarefa = tarefasAdminCache.find((item) => String(item.id) === String(id));
+  const nome = tarefa?.titulo || "esta tarefa";
+
+  const confirmou = confirm(`Deseja excluir "${nome}"?`);
+  if (!confirmou) return;
+
+  try {
+    await excluirTarefaAPI(id);
+
+    tarefasAdminCache = tarefasAdminCache.filter(
+      (item) => String(item.id) !== String(id)
+    );
+
+    if (String(tarefaEmEdicaoId) === String(id)) {
+      limparFormularioAdmin();
+    }
+
+    renderizarTarefasAdmin();
+    alert("Tarefa excluída com sucesso.");
+  } catch (erro) {
+    console.error("Erro ao excluir tarefa:", erro);
+    alert(erro.message || "Erro ao excluir tarefa.");
+  }
+}
+
+async function atualizarFiliaisPorEstadoAdmin() {
+  const { processo, estado } = obterElementosAdmin();
+
+  const processoSelecionado = normalizarTexto(processo?.value);
+  const estadoSelecionado = normalizarTexto(estado?.value);
+
+  if (!processoExigeFilial(processoSelecionado)) return;
+
+  await carregarFiliaisAdmin(estadoSelecionado, "filial", "Selecione a filial");
+}
+
+async function atualizarFiltroFiliaisAdmin() {
+  const { filtroEstado } = obterElementosAdmin();
+  const estadoSelecionado = normalizarTexto(filtroEstado?.value);
+
+  await carregarFiliaisAdmin(estadoSelecionado, "filtroFilial", "Todas as filiais");
+  renderizarTarefasAdmin();
+}
+
+function registrarEventosAdmin() {
+  const {
+    processo,
+    estado,
+    filtroProcesso,
+    filtroEstado,
+    filtroFilial,
+    btnCancelarEdicao
+  } = obterElementosAdmin();
+
+  if (processo) {
+    processo.addEventListener("change", async () => {
+      aplicarRegraProcesso();
+      const { estado: campoEstado, filial } = obterElementosAdmin();
+
+      if (campoEstado) campoEstado.value = "";
+      if (filial) {
+        filial.innerHTML = `<option value="">Selecione a filial</option>`;
+        filial.value = "";
+      }
+    });
+  }
+
+  if (estado) {
+    estado.addEventListener("change", atualizarFiliaisPorEstadoAdmin);
+  }
+
+  if (filtroProcesso) {
+    filtroProcesso.addEventListener("change", renderizarTarefasAdmin);
+  }
+
+  if (filtroEstado) {
+    filtroEstado.addEventListener("change", atualizarFiltroFiliaisAdmin);
+  }
+
+  if (filtroFilial) {
+    filtroFilial.addEventListener("change", renderizarTarefasAdmin);
+  }
+
+  if (btnCancelarEdicao) {
+    btnCancelarEdicao.addEventListener("click", limparFormularioAdmin);
+  }
+
+  const form = document.getElementById("formTarefa");
+  if (form) {
+    form.addEventListener("submit", salvarTarefaAdmin);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+  if (!exigirLogin() || !exigirAdmin()) return;
+
   await carregarEstadosAdmin();
   aplicarRegraProcesso();
-  await carregarTarefasAdminTela();
+  registrarEventosAdmin();
+  await carregarTarefasAdmin();
 });
+
+window.editarTarefa = editarTarefa;
+window.excluirTarefa = excluirTarefa;
+window.salvarTarefaAdmin = salvarTarefaAdmin;
+window.limparFormularioAdmin = limparFormularioAdmin;

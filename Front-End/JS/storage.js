@@ -51,3 +51,20 @@ function excluirHistoricoChecklist(id) {
 function limparHistoricoChecklists() {
   removerItem("historicoChecklists");
 }
+
+function mostrarToast(mensagem, tipo = "info") {
+  const container = document.getElementById("toastContainer");
+  if (!container) return;
+
+  const toast = document.createElement("div");
+  toast.className = `toast ${tipo}`;
+  toast.textContent = mensagem;
+
+  container.appendChild(toast);
+
+  setTimeout(() => {
+    toast.style.opacity = "0";
+    toast.style.transform = "translateX(40px)";
+    setTimeout(() => toast.remove(), 300);
+  }, 3000);
+}

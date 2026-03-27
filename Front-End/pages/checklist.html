@@ -3,12 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <title>CheckFlow - Checklist</title>
-  <link rel="stylesheet" href="../CSS/style.css">
+  <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
   <div class="page">
-  <div class="card">
-
+    <div class="card">
       <div class="logo">
         <img src="../assets/checkflow-logo.png" alt="CheckFlow">
       </div>
@@ -17,13 +16,33 @@
 
       <div class="info-text" id="infoResumo"></div>
 
+      <div id="loadingChecklist" class="loading-state" style="display: none;">
+        <div class="loading-spinner"></div>
+        <span>Carregando checklist...</span>
+      </div>
+
+      <div class="progress-wrapper" id="progressWrapper" style="display: none;">
+        <div class="progress-header">
+          <span>Progresso do checklist</span>
+          <span id="progressText">0%</span>
+        </div>
+
+        <div class="progress-bar">
+          <div id="progressFill" class="progress-fill"></div>
+        </div>
+
+        <div id="progressoChecklist" class="progress-status">
+          0 de 0 tarefas concluídas
+        </div>
+      </div>
+
       <div class="checklist-box" id="checklistContainer"></div>
 
       <div class="button-row actions-inline">
-        <button class="button" onclick="validarChecklist()">
+        <button class="button" id="btnFinalizarChecklist" type="button" onclick="validarChecklist()">
           Finalizar Checklist
         </button>
-        <button class="history-nav-button" onclick="irParaHistorico()">
+        <button class="history-nav-button" type="button" onclick="irParaHistorico()">
           Ver histórico
         </button>
       </div>
@@ -34,308 +53,49 @@
     </div>
   </div>
 
-  <div id="modal" class="modal">
+  <div id="modal" class="modal" style="display: none;">
     <div class="modal-content">
       <h3>Atenção</h3>
       <p>É necessário dar check em todas as atividades.</p>
-      <button onclick="fecharModal()">Fechar</button>
+      <div class="modal-actions">
+        <button type="button" onclick="fecharModal()">Fechar</button>
+      </div>
     </div>
   </div>
 
-  <div id="modalSucesso" class="modal">
+  <div id="modalSucesso" class="modal" style="display: none;">
     <div class="modal-content sucesso">
+      <div class="success-animation">
+        <div class="success-circle">
+          <div class="success-check"></div>
+        </div>
+      </div>
+
       <h3>Sucesso</h3>
       <p>Checklist finalizado com sucesso!</p>
+
       <div class="modal-actions">
-        <button onclick="fecharModalSucesso()">OK</button>
-        <button class="history-nav-button modal-history-button" onclick="irParaHistorico()">
+        <button type="button" onclick="fecharModalSucesso()">OK</button>
+        <button
+          class="history-nav-button modal-history-button"
+          type="button"
+          onclick="irParaHistorico()"
+        >
           Ir para histórico
         </button>
       </div>
     </div>
   </div>
 
+  <div id="toastContainer" class="toast-container"></div>
+
   <script src="../JS/storage.js"></script>
   <script src="../JS/auth.js"></script>
   <script src="../JS/api.js"></script>
+  <script src="../JS/checklist.js"></script>
 
   <script>
-    let tarefasAtuais = [];
-
-    function montarResumo() {
-      const processo = lerTexto("processoSelecionado");
-      const estados = lerLista("estadosSelecionados");
-      const filiais = lerLista("filiaisSelecionadas");
-      const competencia = lerTexto("competenciaSelecionada");
-
-      const html = `
-        <div>
-          <strong>Processo</strong>
-          <span>${processo || "-"}</span>
-        </div>
-        <div>
-          <strong>Competência</strong>
-          <span>${competencia || "-"}</span>
-        </div>
-        <div>
-          <strong>Estados</strong>
-          <span>${estados.length ? estados.join(", ") : "-"}</span>
-        </div>
-        <div>
-          <strong>Filiais</strong>
-          <span>${filiais.length ? filiais.join(", ") : "-"}</span>
-        </div>
-      `;
-
-      document.getElementById("infoResumo").innerHTML = html;
-    }
-
-    function montarChaveChecklist() {
-      const processo = lerTexto("processoSelecionado") || "";
-      const competencia = lerTexto("competenciaSelecionada") || "";
-      const estados = lerLista("estadosSelecionados").join("_");
-      const filiais = lerLista("filiaisSelecionadas").join("_");
-
-      return `checklist_${processo}_${competencia}_${estados}_${filiais}`;
-    }
-
-    function salvarProgressoChecklist() {
-      const checkboxes = document.querySelectorAll(".task-checkbox");
-      const progresso = [];
-
-      checkboxes.forEach(function (checkbox, index) {
-        progresso.push({
-          index: index,
-          marcado: checkbox.checked
-        });
-      });
-
-      localStorage.setItem(montarChaveChecklist(), JSON.stringify(progresso));
-    }
-
-    async function salvarFinalizacaoChecklist() {
-      const processo = lerTexto("processoSelecionado");
-      const competencia = lerTexto("competenciaSelecionada");
-      const estados = lerLista("estadosSelecionados");
-      const filiais = lerLista("filiaisSelecionadas");
-      const usuario = lerTexto("usuarioLogado");
-
-      const checkboxes = document.querySelectorAll(".task-checkbox");
-
-      const tarefasDetalhadas = [];
-
-      checkboxes.forEach((checkbox, index) => {
-        tarefasDetalhadas.push({
-          titulo: tarefasAtuais[index].titulo,
-          concluida: checkbox.checked
-        });
-      });
-
-      const registro = {
-        id: String(Date.now()),
-        processo,
-        competencia,
-        estados,
-        filiais,
-        usuario,
-        finalizadoEm: new Date().toLocaleString("pt-BR"),
-        status: "finalizado",
-        totalTarefas: tarefasDetalhadas.length,
-        concluidas: tarefasDetalhadas.filter(t => t.concluida).length,
-        tarefas: tarefasDetalhadas
-      };
-
-      await salvarHistoricoAPI(registro);
-    }
-
-    function carregarProgressoChecklist() {
-      const progressoSalvo = localStorage.getItem(montarChaveChecklist());
-
-      if (!progressoSalvo) {
-        return;
-      }
-
-      const progresso = JSON.parse(progressoSalvo);
-      const checkboxes = document.querySelectorAll(".task-checkbox");
-
-      progresso.forEach(function (item) {
-        if (checkboxes[item.index]) {
-          checkboxes[item.index].checked = item.marcado;
-        }
-      });
-    }
-
-  async function carregarChecklist() {
-  const processo = lerTexto("processoSelecionado");
-  const estados = lerLista("estadosSelecionados");
-  const filiais = lerLista("filiaisSelecionadas");
-
-  if (!processo) {
-    alert("Processo não encontrado.");
-    return;
-  }
-
-  try {
-    let tarefas = [];
-
-    if (processo === "SPED") {
-      const estadoBase = estados[0] || "";
-      const tarefasBase = await buscarTarefas(processo, estadoBase, null);
-
-      tarefasBase.forEach(function (tarefa) {
-        tarefas.push(tarefa);
-      });
-
-      for (let i = 1; i < estados.length; i++) {
-        const estado = estados[i];
-        const tarefasEstado = await buscarTarefas(processo, estado, null);
-
-        tarefasEstado.forEach(function (tarefa) {
-          tarefas.push(tarefa);
-        });
-      }
-    } else if (processo === "SCANC" || processo === "Apuração") {
-      const estadoBase = estados[0] || "";
-
-      if (filiais.length === 0) {
-        const tarefasBase = await buscarTarefas(processo, estadoBase, null);
-
-        tarefasBase.forEach(function (tarefa) {
-          tarefas.push(tarefa);
-        });
-      } else {
-        for (const filial of filiais) {
-          const tarefasFilial = await buscarTarefas(processo, estadoBase, filial);
-
-          tarefasFilial.forEach(function (tarefa) {
-            tarefas.push(tarefa);
-          });
-        }
-      }
-    } else {
-      for (const estado of estados) {
-        const filial = filiais[0] || null;
-        const tarefasAPI = await buscarTarefas(processo, estado, filial);
-
-        tarefasAPI.forEach(function (tarefa) {
-          tarefas.push(tarefa);
-        });
-      }
-    }
-
-    const tarefasUnicas = [];
-    const chavesJaAdicionadas = new Set();
-
-    tarefas.forEach(function (tarefa) {
-      const chave = tarefa.id
-        ? String(tarefa.id)
-        : `${tarefa.titulo}__${JSON.stringify(tarefa.instrucao || [])}`;
-
-      if (!chavesJaAdicionadas.has(chave)) {
-        chavesJaAdicionadas.add(chave);
-        tarefasUnicas.push(tarefa);
-      }
-    });
-
-    tarefasAtuais = tarefasUnicas;
-    renderizarChecklist(tarefasAtuais);
-    carregarProgressoChecklist();
-    ativarAutoSave();
-  } catch (erro) {
-    console.error("Erro ao carregar checklist:", erro);
-    alert("Erro ao carregar checklist.");
-  }
-}
-
-    function renderizarChecklist(tarefas) {
-      const container = document.getElementById("checklistContainer");
-
-      if (!tarefas.length) {
-        container.innerHTML = "<p>Nenhuma tarefa encontrada.</p>";
-        return;
-      }
-
-      let html = "";
-
-      tarefas.forEach(function (tarefa, index) {
-        html += `
-          <div class="task">
-            <div class="task-top">
-              <div class="task-left">
-                <input type="checkbox" class="task-checkbox" data-index="${index}">
-                <span class="task-title">${tarefa.titulo}</span>
-              </div>
-              <button class="instruction-button" type="button" onclick="toggleInstrucao(${index})">
-                Ver instrução
-              </button>
-            </div>
-
-            <div class="instruction-box" id="instrucao-${index}">
-              ${tarefa.instrucao && tarefa.instrucao.length
-                ? tarefa.instrucao.map((passo, i) => `${i + 1}. ${passo}`).join("<br>")
-                : "Sem instruções cadastradas."}
-            </div>
-          </div>
-        `;
-      });
-
-      container.innerHTML = html;
-    }
-
-    function ativarAutoSave() {
-      const checkboxes = document.querySelectorAll(".task-checkbox");
-
-      checkboxes.forEach(function (checkbox) {
-        checkbox.addEventListener("change", salvarProgressoChecklist);
-      });
-    }
-
-    function toggleInstrucao(index) {
-      const box = document.getElementById("instrucao-" + index);
-      box.style.display = box.style.display === "block" ? "none" : "block";
-    }
-
-    async function validarChecklist() {
-      const checkboxes = document.querySelectorAll(".task-checkbox");
-      let todosMarcados = true;
-
-      checkboxes.forEach(function (checkbox) {
-        if (!checkbox.checked) {
-          todosMarcados = false;
-        }
-      });
-
-      if (!todosMarcados || checkboxes.length === 0) {
-        document.getElementById("modal").style.display = "flex";
-        return;
-      }
-
-      try {
-        salvarProgressoChecklist();
-        await salvarFinalizacaoChecklist();
-        document.getElementById("modalSucesso").style.display = "flex";
-      } catch (erro) {
-        console.error("Erro ao salvar finalização:", erro);
-        alert("Erro ao salvar histórico no servidor.");
-      }
-    }
-
-    function fecharModal() {
-      document.getElementById("modal").style.display = "none";
-    }
-
-    function fecharModalSucesso() {
-      document.getElementById("modalSucesso").style.display = "none";
-    }
-
-    function irParaHistorico() {
-      window.location.href = "historico.html";
-    }
-
-    if (exigirLogin() && exigirArea() && exigirProcesso()) {
-      montarResumo();
-      carregarChecklist();
-    }
+    
   </script>
 </body>
 </html>

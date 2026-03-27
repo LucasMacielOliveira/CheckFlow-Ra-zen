@@ -1,224 +1,295 @@
-let acaoConfirmada = null;
+let historicoCache = [];
+let idParaExcluir = null;
 
-function voltarParaProcessos() {
-  window.location.href = "processo.html";
+function escaparHtml(texto) {
+  return String(texto ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
 
-function formatarTextoLista(lista) {
-  if (!lista || !lista.length) {
+function obterElemento(id) {
+  return document.getElementById(id);
+}
+
+function formatarLista(lista) {
+  if (!Array.isArray(lista) || !lista.length) {
     return "-";
   }
-  return lista.join(", ");
+
+  return lista.map((item) => escaparHtml(item)).join(", ");
 }
 
-function formatarCompetencia(valor) {
-  if (!valor) return "-";
-
-  const partes = valor.split("-");
-  if (partes.length !== 2) return valor;
-
-  return `${partes[1]}/${partes[0]}`;
-}
-
-function abrirModalConfirmacao(texto, callback) {
-  document.getElementById("textoConfirmacao").textContent = texto;
-  acaoConfirmada = callback;
-  document.getElementById("modalConfirmacao").style.display = "flex";
+function abrirModalConfirmacao(id) {
+  idParaExcluir = id;
+  const modal = obterElemento("modalConfirmacao");
+  if (modal) {
+    modal.style.display = "flex";
+  }
 }
 
 function fecharModalConfirmacao() {
-  document.getElementById("modalConfirmacao").style.display = "none";
-  acaoConfirmada = null;
-}
-
-function executarAcaoConfirmada() {
-  if (typeof acaoConfirmada === "function") {
-    acaoConfirmada();
-  }
-  fecharModalConfirmacao();
-}
-
-function confirmarExclusao(id) {
-  abrirModalConfirmacao("Deseja realmente excluir este registro?", async function () {
-    try {
-      await excluirHistoricoAPI(id);
-      await renderizarHistorico();
-    } catch (erro) {
-      console.error("Erro ao excluir:", erro);
-      alert("Erro ao excluir registro.");
-    }
-  });
-}
-
-function confirmarLimparHistorico() {
-  abrirModalConfirmacao("Deseja apagar todo o histórico?", async function () {
-    try {
-      await limparHistoricoAPI();
-      await renderizarHistorico();
-    } catch (erro) {
-      console.error("Erro ao limpar:", erro);
-      alert("Erro ao limpar histórico.");
-    }
-  });
-}
-
-
-async function verDetalhes(id) {
-  try {
-    console.log("ID recebido:", id);
-
-    if (typeof buscarHistoricoAPI !== "function") {
-      throw new Error("Função buscarHistoricoAPI não encontrada.");
-    }
-
-    const historico = await buscarHistoricoAPI();
-    console.log("Histórico carregado:", historico);
-
-    const item = historico.find(function (h) {
-      return String(h.id) === String(id);
-    });
-
-    console.log("Item encontrado:", item);
-
-    if (!item) {
-      throw new Error("Registro não encontrado no histórico.");
-    }
-
-    const modal = document.getElementById("modalDetalhes");
-    const conteudo = document.getElementById("conteudoDetalhes");
-
-    if (!modal) {
-      throw new Error("Elemento #modalDetalhes não existe no HTML.");
-    }
-
-    if (!conteudo) {
-      throw new Error("Elemento #conteudoDetalhes não existe no HTML.");
-    }
-
-    let html = `
-      <div style="margin-bottom:15px;">
-        <strong>Processo:</strong> ${item.processo || "-"}<br>
-        <strong>Competência:</strong> ${formatarCompetencia(item.competencia || "")}<br>
-        <strong>Usuário:</strong> ${item.usuario || "-"}<br>
-        <strong>Data:</strong> ${item.finalizadoEm || "-"}
-      </div>
-    `;
-
-    if (Array.isArray(item.tarefas) && item.tarefas.length > 0) {
-      item.tarefas.forEach(function (tarefa, i) {
-        html += `
-          <div style="padding:8px; margin-bottom:6px; border-radius:6px; background:#f5f5f5;">
-            ${tarefa.concluida ? "✅" : "❌"} ${i + 1}. ${tarefa.titulo || "Sem título"}
-          </div>
-        `;
-      });
-    } else {
-      html += `
-        <div style="padding:10px; border-radius:6px; background:#fff3cd; color:#856404;">
-          Esse checklist não possui tarefas detalhadas salvas.
-        </div>
-      `;
-    }
-
-    conteudo.innerHTML = html;
-    modal.style.display = "flex";
-
-  } catch (erro) {
-    console.error("Erro real ao carregar detalhes:", erro);
-    alert("Erro ao carregar detalhes: " + erro.message);
-  }
-}
-
-function fecharModalDetalhes() {
-  const modal = document.getElementById("modalDetalhes");
+  idParaExcluir = null;
+  const modal = obterElemento("modalConfirmacao");
   if (modal) {
     modal.style.display = "none";
   }
 }
 
-function fecharModalDetalhes() {
-  document.getElementById("modalDetalhes").style.display = "none";
-}
-
-async function renderizarHistorico() {
-  const container = document.getElementById("historicoLista");
-
-  try {
-    const historico = await buscarHistoricoAPI();
-
-    if (!historico.length) {
-      container.innerHTML = `
-        <div class="empty-history">
-          <h3>Nenhum checklist ainda</h3>
-          <p>Finalize um checklist para aparecer aqui.</p>
-        </div>
-      `;
-      return;
-    }
-
-    let html = "";
-
-    historico.forEach(item => {
-      html += `
-        <div class="history-card">
-
-          <div class="history-card-top">
-            <div>
-              <div class="history-processo">${item.processo}</div>
-              <div class="history-date">${item.finalizadoEm}</div>
-            </div>
-
-            <span class="status-badge success">
-              Concluído
-            </span>
-          </div>
-
-          <div class="history-grid">
-            <div>
-              <strong>Competência:</strong> ${formatarCompetencia(item.competencia)}
-            </div>
-
-            <div>
-              <strong>Usuário:</strong> ${item.usuario}
-            </div>
-
-            <div>
-              <strong>Estados:</strong> ${formatarTextoLista(item.estados)}
-            </div>
-
-            <div>
-              <strong>Filiais:</strong> ${formatarTextoLista(item.filiais)}
-            </div>
-
-            <div>
-              <strong>Concluídas:</strong> ${item.concluidas}/${item.totalTarefas}
-            </div>
-          </div>
-
-          <div class="history-card-actions">
-            <button onclick="verDetalhes('${item.id}')">
-              Ver detalhes
-            </button>
-
-            <button onclick="confirmarExclusao('${item.id}')">
-              Excluir
-            </button>
-          </div>
-
-        </div>
-      `;
-    });
-
-    container.innerHTML = html;
-
-  } catch (erro) {
-    console.error("Erro ao carregar histórico:", erro);
-    alert("Erro ao carregar histórico.");
+function abrirModalDetalhes() {
+  const modal = obterElemento("modalDetalhes");
+  if (modal) {
+    modal.style.display = "flex";
   }
 }
 
+function fecharModalDetalhes() {
+  const modal = obterElemento("modalDetalhes");
+  const conteudo = obterElemento("conteudoDetalhes");
 
+  if (modal) {
+    modal.style.display = "none";
+  }
 
-if (exigirLogin() && exigirArea()) {
-  renderizarHistorico();
+  if (conteudo) {
+    conteudo.innerHTML = "";
+  }
 }
+
+function formatarTarefasDetalhes(tarefas) {
+  if (!Array.isArray(tarefas) || !tarefas.length) {
+    return `<p>Nenhuma tarefa registrada.</p>`;
+  }
+
+  return `
+    <div class="detalhes-tarefas-lista">
+      ${tarefas.map((tarefa) => {
+        const titulo = escaparHtml(tarefa?.titulo || "Tarefa sem título");
+        const concluida = Boolean(tarefa?.concluida);
+
+        return `
+          <div class="detalhe-tarefa-item ${concluida ? "concluida" : "pendente"}">
+            <span class="detalhe-status">${concluida ? "✔" : "○"}</span>
+            <span class="detalhe-titulo">${titulo}</span>
+          </div>
+        `;
+      }).join("")}
+    </div>
+  `;
+}
+
+function renderizarHistorico() {
+  const container = obterElemento("historyList");
+  if (!container) return;
+
+  if (!Array.isArray(historicoCache) || !historicoCache.length) {
+    container.innerHTML = `
+      <div class="empty-state">
+        Nenhum checklist finalizado encontrado.
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = historicoCache.map((item) => {
+    const processo = escaparHtml(item.processo || "-");
+    const competencia = escaparHtml(item.competencia || "-");
+    const usuario = escaparHtml(item.usuario || "-");
+    const finalizadoEm = escaparHtml(item.finalizadoEm || "-");
+    const estados = formatarLista(item.estados);
+    const filiais = formatarLista(item.filiais);
+    const total = Number(item.totalTarefas || 0);
+    const concluidas = Number(item.concluidas || 0);
+    const id = escaparHtml(item.id);
+
+    return `
+      <div class="history-card">
+        <div class="history-card-header">
+          <div>
+            <h3>${processo}</h3>
+            <p><strong>Competência:</strong> ${competencia}</p>
+          </div>
+          <span class="status-badge finalizado">Finalizado</span>
+        </div>
+
+        <div class="history-card-body">
+          <p><strong>Estados:</strong> ${estados}</p>
+          <p><strong>Filiais:</strong> ${filiais}</p>
+          <p><strong>Usuário:</strong> ${usuario}</p>
+          <p><strong>Finalizado em:</strong> ${finalizadoEm}</p>
+          <p><strong>Progresso:</strong> ${concluidas}/${total}</p>
+        </div>
+
+        <div class="history-card-actions">
+          <button
+            type="button"
+            class="button secondary"
+            onclick="verDetalhes('${id}')"
+          >
+            Ver detalhes
+          </button>
+
+          <button
+            type="button"
+            class="button danger"
+            onclick="abrirModalConfirmacao('${id}')"
+          >
+            Excluir
+          </button>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+async function carregarHistorico() {
+  const loading = document.getElementById("loadingHistorico");
+  const container = document.getElementById("historyList");
+
+  try {
+    if (loading) loading.style.display = "flex";
+    if (container) container.innerHTML = "";
+
+    historicoCache = await buscarHistoricoAPI();
+
+    if (!Array.isArray(historicoCache)) {
+      historicoCache = [];
+    }
+
+    historicoCache.sort((a, b) => Number(b.id || 0) - Number(a.id || 0));
+    renderizarHistorico();
+  } catch (erro) {
+    console.error("Erro detalhado ao carregar histórico:", erro);
+    if (container) {
+      container.innerHTML = `
+        <div class="empty-state">
+          Erro ao carregar histórico.
+        </div>
+      `;
+    }
+  } finally {
+    if (loading) loading.style.display = "none";
+  }
+}
+
+function verDetalhes(id) {
+  const item = historicoCache.find((registro) => String(registro.id) === String(id));
+
+  if (!item) {
+    alert("Registro não encontrado.");
+    return;
+  }
+
+  const conteudo = obterElemento("conteudoDetalhes");
+  if (!conteudo) return;
+
+  conteudo.innerHTML = `
+    <div class="detalhes-bloco">
+      <p><strong>Processo:</strong> ${escaparHtml(item.processo || "-")}</p>
+      <p><strong>Competência:</strong> ${escaparHtml(item.competencia || "-")}</p>
+      <p><strong>Estados:</strong> ${formatarLista(item.estados)}</p>
+      <p><strong>Filiais:</strong> ${formatarLista(item.filiais)}</p>
+      <p><strong>Usuário:</strong> ${escaparHtml(item.usuario || "-")}</p>
+      <p><strong>Finalizado em:</strong> ${escaparHtml(item.finalizadoEm || "-")}</p>
+      <p><strong>Status:</strong> ${escaparHtml(item.status || "-")}</p>
+      <p><strong>Progresso:</strong> ${Number(item.concluidas || 0)}/${Number(item.totalTarefas || 0)}</p>
+    </div>
+
+    <div class="detalhes-bloco">
+      <h4>Tarefas</h4>
+      ${formatarTarefasDetalhes(item.tarefas)}
+    </div>
+  `;
+
+  abrirModalDetalhes();
+}
+
+async function confirmarExclusaoHistorico() {
+  if (!idParaExcluir) return;
+
+  try {
+    await excluirHistoricoAPI(idParaExcluir);
+
+    historicoCache = historicoCache.filter(
+      (item) => String(item.id) !== String(idParaExcluir)
+    );
+
+    fecharModalConfirmacao();
+    renderizarHistorico();
+    alert("Registro excluído com sucesso.");
+  } catch (erro) {
+    console.error("Erro ao excluir registro:", erro);
+    alert(erro.message || "Erro ao excluir registro.");
+  }
+}
+
+async function limparHistoricoCompleto() {
+  const confirmou = confirm("Deseja apagar todo o histórico?");
+  if (!confirmou) return;
+
+  try {
+    await limparHistoricoAPI();
+    historicoCache = [];
+    renderizarHistorico();
+    alert("Histórico limpo com sucesso.");
+  } catch (erro) {
+    console.error("Erro ao limpar histórico:", erro);
+    alert(erro.message || "Erro ao limpar histórico.");
+  }
+}
+
+function voltarChecklist() {
+  window.location.href = "checklist.html";
+}
+
+function registrarEventosHistorico() {
+  const btnConfirmar = obterElemento("btnConfirmarExclusao");
+  const btnCancelar = obterElemento("btnCancelarExclusao");
+  const btnFecharDetalhes = obterElemento("btnFecharDetalhes");
+  const btnLimparHistorico = obterElemento("btnLimparHistorico");
+
+  if (btnConfirmar) {
+    btnConfirmar.addEventListener("click", confirmarExclusaoHistorico);
+  }
+
+  if (btnCancelar) {
+    btnCancelar.addEventListener("click", fecharModalConfirmacao);
+  }
+
+  if (btnFecharDetalhes) {
+    btnFecharDetalhes.addEventListener("click", fecharModalDetalhes);
+  }
+
+  if (btnLimparHistorico) {
+    btnLimparHistorico.addEventListener("click", limparHistoricoCompleto);
+  }
+
+  window.addEventListener("click", (event) => {
+    const modalConfirmacao = obterElemento("modalConfirmacao");
+    const modalDetalhes = obterElemento("modalDetalhes");
+
+    if (event.target === modalConfirmacao) {
+      fecharModalConfirmacao();
+    }
+
+    if (event.target === modalDetalhes) {
+      fecharModalDetalhes();
+    }
+  });
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+  if (!exigirLogin() || !exigirArea()) return;
+
+  registrarEventosHistorico();
+  await carregarHistorico();
+});
+
+window.verDetalhes = verDetalhes;
+window.abrirModalConfirmacao = abrirModalConfirmacao;
+window.fecharModalConfirmacao = fecharModalConfirmacao;
+window.fecharModalDetalhes = fecharModalDetalhes;
+window.limparHistoricoCompleto = limparHistoricoCompleto;
+window.voltarChecklist = voltarChecklist;
