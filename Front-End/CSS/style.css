@@ -3013,5 +3013,5 @@ button:disabled {
 
 /* PROGRESSO */
 .progress-fill {
-  transition: width 0.3s ease;
+  transition: width 0.3s ease, background 0.3s ease;
 }
