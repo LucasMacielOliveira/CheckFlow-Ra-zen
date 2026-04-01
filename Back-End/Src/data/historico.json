@@ -60,5 +60,143 @@
         "concluida": true
       }
     ]
+  },
+  {
+    "id": "1774892185843",
+    "processo": "Apuração",
+    "competencia": "2026-03",
+    "estados": [
+      "São Paulo"
+    ],
+    "filiais": [
+      "Ribeirão Preto"
+    ],
+    "usuario": "Lucas Maciel",
+    "finalizadoEm": "30/03/2026, 14:36:25",
+    "status": "finalizado",
+    "totalTarefas": 30,
+    "concluidas": 30,
+    "tarefas": [
+      {
+        "titulo": "Geração dos relatórios de pendência do SIG Fiscal (RAZOABILIDADE)",
+        "concluida": true
+      },
+      {
+        "titulo": "Conferência do Relatório de Conferência de Cálculo PMPF x MVA no ST das saídas internas e interestaduais",
+        "concluida": true
+      },
+      {
+        "titulo": "Conferir se Apuração de IPI está com valores zerados",
+        "concluida": true
+      },
+      {
+        "titulo": "Gerar Apuração de ICMS, ICMS ST e IPI e verificar valores",
+        "concluida": true
+      },
+      {
+        "titulo": "Criação dos ajustes de contabilização da 2ª rotina",
+        "concluida": true
+      },
+      {
+        "titulo": "Dispêndio ALL & BRF",
+        "concluida": true
+      },
+      {
+        "titulo": "Avaliar cenário de recobrança de ativos, ajustes em conta gráfica e baixa em CIAP",
+        "concluida": true
+      },
+      {
+        "titulo": "Conferir crédito de ICMS no CFOP 1.652/2.652 em operações de entrega futura HALC",
+        "concluida": true
+      },
+      {
+        "titulo": "Extrair relatório Análise NF Alto Valor",
+        "concluida": true
+      },
+      {
+        "titulo": "Verificar se houve pagamento de operações interestaduais com não contribuintes",
+        "concluida": true
+      },
+      {
+        "titulo": "Contabilização de possíveis divergências no DIFAL",
+        "concluida": true
+      },
+      {
+        "titulo": "Gerar Relatório Demonstrativo Cálculo Fundo Pobreza - Sergipe",
+        "concluida": true
+      },
+      {
+        "titulo": "Conferência do preço nos processos de armazenagem",
+        "concluida": true
+      },
+      {
+        "titulo": "Conferir existência e corrigir remessas para conserto intercompany",
+        "concluida": true
+      },
+      {
+        "titulo": "Conferir existência e motivo do CFOP 1949/2949 e 5949/6949",
+        "concluida": true
+      },
+      {
+        "titulo": "Análise da variação da apuração do imposto (Relatório Gerencial)",
+        "concluida": true
+      },
+      {
+        "titulo": "Conferir cálculo e apurar o DIFAL",
+        "concluida": true
+      },
+      {
+        "titulo": "DIFAL: SHELL WATER DETECTOR UF de origem RJ, calcular DIFAL com alíquota cheia",
+        "concluida": true
+      },
+      {
+        "titulo": "DIFAL NF 949: recolher DIFAL exceto quando já tributou ST",
+        "concluida": true
+      },
+      {
+        "titulo": "Verificar débitos indevidos de ICMS - análise por CFOP",
+        "concluida": true
+      },
+      {
+        "titulo": "Conclusão da análise do relatório Consulta Completa - NF Entrada / NF Saída",
+        "concluida": true
+      },
+      {
+        "titulo": "Conferência do relatório Produto Alíquota - Entrada e Produto Alíquota - Saída no SIG Fiscal",
+        "concluida": true
+      },
+      {
+        "titulo": "Conferir a base de cálculo do ICMS ST dos produtos conforme legislação vigente",
+        "concluida": true
+      },
+      {
+        "titulo": "Gerar relatórios para SOX e realizar upload dos documentos no SGT",
+        "concluida": true
+      },
+      {
+        "titulo": "Verificar pagamentos antecipados para os ajustes necessários em conta gráfica ou restituição",
+        "concluida": true
+      },
+      {
+        "titulo": "Conferência do CIAP do SATI - verificar coeficiente de creditamento calculado",
+        "concluida": true
+      },
+      {
+        "titulo": "Verificar alteração de alíquota com efeito retroativo e apurar os impactos de acordo com legislação do Estado",
+        "concluida": true
+      },
+      {
+        "titulo": "Análise das notas inutilizadas no período - PW x Sefaz",
+        "concluida": true
+      },
+      {
+        "titulo": "Em caso de estorno de nota fiscal de entrada no livro, exceto notas duplicadas, enviar e-mail para as responsáveis do DASH",
+        "concluida": true
+      },
+      {
+        "titulo": "Encerrar filial, apurar e emitir guias para recolhimento",
+        "concluida": true
+      }
+    ]
   }
 ]
