@@ -13,10 +13,9 @@ const DATA_DIR = path.join(__dirname, "data");
 const HISTORICO_FILE = path.join(DATA_DIR, "historico.json");
 const TAREFAS_FILE = path.join(DATA_DIR, "tarefas.json");
 const TAREFAS_PADRAO_FILE = path.join(DATA_DIR, "tarefas-padrao.json");
+const SOLICITACOES_FILE = path.join(DATA_DIR, "solicitacoes.json");
 
-/* =========================
-   DADOS FIXOS
-========================= */
+// DADOS FIXOS
 
 const filiaisPorEstado = {
   "São Paulo": ["Paulínia", "São Paulo", "Ribeirão Preto", "Santos"],
@@ -30,9 +29,8 @@ const filiaisPorEstado = {
 
 const estadosDisponiveis = Object.keys(filiaisPorEstado);
 
-/* =========================
-   UTILITÁRIOS DE ARQUIVO
-========================= */
+//UTILITÁRIOS DE ARQUIVO
+
 
 function garantirArquivo(caminho, conteudoInicial) {
   if (!fs.existsSync(caminho)) {
@@ -83,6 +81,14 @@ function lerTarefasPadrao() {
     SCANC: [],
     Apuração: []
   });
+}
+
+function lerSolicitacoes() {
+  return lerJson(SOLICITACOES_FILE, []);
+}
+
+function salvarSolicitacoes(dados) {
+  salvarJson(SOLICITACOES_FILE, dados);
 }
 
 /* =========================
@@ -170,9 +176,48 @@ function validarTarefaAdmin(payload) {
   };
 }
 
-/* =========================
-   ROTAS AUXILIARES
-========================= */
+function validarSolicitacao(payload) {
+  const processo = normalizarTexto(payload.processo);
+  const estado = normalizarTexto(payload.estado);
+  const filial = normalizarTexto(payload.filial);
+  const descricao = normalizarTexto(payload.descricao);
+  const criadoPor = normalizarTexto(payload.criadoPor);
+
+  if (!processo) {
+    return { erro: "Processo é obrigatório." };
+  }
+
+  if (!estado) {
+    return { erro: "Estado é obrigatório." };
+  }
+
+  if ((processo === "SCANC" || processo === "Apuração") && !filial) {
+    return { erro: "Filial é obrigatória para este processo." };
+  }
+
+  if (processo === "SPED") {
+    // SPED não precisa de filial
+  }
+
+  if (!descricao || descricao.length < 10) {
+    return { erro: "Descreva a necessidade com pelo menos 10 caracteres." };
+  }
+
+  if (!criadoPor) {
+    return { erro: "Usuário solicitante é obrigatório." };
+  }
+
+  return {
+    processo,
+    estado,
+    filial: processo === "SPED" ? "" : filial,
+    descricao,
+    criadoPor
+  };
+}
+
+// ROTAS AUXILIARES
+
 
 app.get("/", (req, res) => {
   res.json({ ok: true, mensagem: "API CheckFlow online." });
@@ -192,9 +237,8 @@ app.get("/filiais", (req, res) => {
   return res.json(filiaisPorEstado[estado] || []);
 });
 
-/* =========================
-   CHECKLIST
-========================= */
+//CHECKLIST
+
 
 app.get("/tarefas", (req, res) => {
   try {
@@ -245,12 +289,24 @@ app.get("/tarefas", (req, res) => {
   }
 });
 
-/* HISTÓRICO*/
+//HISTÓRICO
 
 app.get("/historico", (req, res) => {
   try {
-    const historico = lerHistorico();
-    return res.json(Array.isArray(historico) ? historico : []);
+    const usuario = normalizarTexto(req.query.usuario);
+    let historico = lerHistorico();
+
+    if (!Array.isArray(historico)) {
+      historico = [];
+    }
+
+    if (usuario) {
+      historico = historico.filter(
+        (item) => normalizarTexto(item.usuario).toLowerCase() === usuario.toLowerCase()
+      );
+    }
+
+    return res.json(historico);
   } catch (error) {
     console.error("Erro ao listar histórico:", error);
     return res.status(500).json({ erro: "Erro ao listar histórico." });
@@ -326,7 +382,108 @@ app.delete("/historico", (req, res) => {
   }
 });
 
-/* ADMIN - TAREFAS EXTRAS*/
+//SOLICITAÇÕES DE TAREFA
+
+app.get("/solicitacoes", (req, res) => {
+  try {
+    const status = normalizarTexto(req.query.status);
+    const criadoPor = normalizarTexto(req.query.criadoPor);
+
+    let solicitacoes = lerSolicitacoes();
+
+    if (!Array.isArray(solicitacoes)) {
+      solicitacoes = [];
+    }
+
+    if (status) {
+      solicitacoes = solicitacoes.filter(
+        (item) => normalizarTexto(item.status).toLowerCase() === status.toLowerCase()
+      );
+    }
+
+    if (criadoPor) {
+      solicitacoes = solicitacoes.filter(
+        (item) => normalizarTexto(item.criadoPor).toLowerCase() === criadoPor.toLowerCase()
+      );
+    }
+
+    solicitacoes.sort((a, b) => {
+      const dataA = new Date(a.dataCriacao || 0).getTime();
+      const dataB = new Date(b.dataCriacao || 0).getTime();
+      return dataB - dataA;
+    });
+
+    return res.json(solicitacoes);
+  } catch (error) {
+    console.error("Erro ao listar solicitações:", error);
+    return res.status(500).json({ erro: "Erro ao listar solicitações." });
+  }
+});
+
+app.post("/solicitacoes", (req, res) => {
+  try {
+    const validacao = validarSolicitacao(req.body || {});
+
+    if (validacao.erro) {
+      return res.status(400).json({ erro: validacao.erro });
+    }
+
+    const solicitacoes = lerSolicitacoes();
+
+    const novaSolicitacao = {
+      id: gerarId("sol"),
+      tipo: "solicitacao_tarefa",
+      processo: validacao.processo,
+      estado: validacao.estado,
+      filial: validacao.filial,
+      descricao: validacao.descricao,
+      criadoPor: validacao.criadoPor,
+      status: "pendente",
+      dataCriacao: new Date().toISOString()
+    };
+
+    solicitacoes.push(novaSolicitacao);
+    salvarSolicitacoes(solicitacoes);
+
+    return res.status(201).json(novaSolicitacao);
+  } catch (error) {
+    console.error("Erro ao criar solicitação:", error);
+    return res.status(500).json({ erro: "Erro ao criar solicitação." });
+  }
+});
+
+app.patch("/solicitacoes/:id/status", (req, res) => {
+  try {
+    const { id } = req.params;
+    const novoStatus = normalizarTexto(req.body?.status);
+
+    if (!["pendente", "atendida", "recusada"].includes(novoStatus)) {
+      return res.status(400).json({ erro: "Status inválido." });
+    }
+
+    const solicitacoes = lerSolicitacoes();
+    const index = solicitacoes.findIndex((item) => String(item.id) === String(id));
+
+    if (index === -1) {
+      return res.status(404).json({ erro: "Solicitação não encontrada." });
+    }
+
+    solicitacoes[index] = {
+      ...solicitacoes[index],
+      status: novoStatus,
+      atualizadoEm: new Date().toISOString()
+    };
+
+    salvarSolicitacoes(solicitacoes);
+    return res.json(solicitacoes[index]);
+  } catch (error) {
+    console.error("Erro ao atualizar status da solicitação:", error);
+    return res.status(500).json({ erro: "Erro ao atualizar solicitação." });
+  }
+});
+
+// ADMIN - TAREFAS EXTRAS
+
 
 app.get("/admin/tarefas", (req, res) => {
   try {
@@ -359,6 +516,23 @@ app.post("/admin/tarefas", (req, res) => {
 
     tarefas.push(novaTarefa);
     salvarTarefas(tarefas);
+
+    const solicitacaoId = normalizarTexto(req.body?.solicitacaoId);
+    if (solicitacaoId) {
+      const solicitacoes = lerSolicitacoes();
+      const indexSolicitacao = solicitacoes.findIndex(
+        (item) => String(item.id) === String(solicitacaoId)
+      );
+
+      if (indexSolicitacao !== -1) {
+        solicitacoes[indexSolicitacao] = {
+          ...solicitacoes[indexSolicitacao],
+          status: "atendida",
+          atualizadoEm: new Date().toISOString()
+        };
+        salvarSolicitacoes(solicitacoes);
+      }
+    }
 
     return res.status(201).json(novaTarefa);
   } catch (error) {
@@ -421,7 +595,7 @@ app.delete("/admin/tarefas/:id", (req, res) => {
   }
 });
 
-/*START*/
+//START
 
 app.listen(PORT, () => {
   console.log(`Servidor CheckFlow rodando em http://localhost:${PORT}`);
