@@ -14,6 +14,14 @@ function obterElemento(id) {
   return document.getElementById(id);
 }
 
+function obterUsuarioAtual() {
+  return lerTexto("usuarioLogado") || "";
+}
+
+function usuarioEhAdmin() {
+  return lerTexto("perfilUsuario") === "admin";
+}
+
 function formatarLista(lista) {
   if (!Array.isArray(lista) || !lista.length) {
     return "-";
@@ -80,7 +88,27 @@ function formatarTarefasDetalhes(tarefas) {
   `;
 }
 
-function renderizarHistorico() {
+function atualizarCabecalhoHistorico() { // ajusta títulos e descrições com base no perfil do usuário
+  const titulo = document.getElementById("tituloHistorico");
+  const descricao = document.getElementById("descricaoHistorico");
+  const botaoLimpar = document.getElementById("btnLimparHistorico");
+
+  if (usuarioEhAdmin()) {
+    if (titulo) titulo.textContent = "Histórico de Checklists";
+    if (descricao) {
+      descricao.textContent = "Consulte os checklists finalizados e remova registros quando necessário.";
+    }
+    if (botaoLimpar) botaoLimpar.style.display = "inline-flex";
+  } else {
+    if (titulo) titulo.textContent = "Meu histórico";
+    if (descricao) {
+      descricao.textContent = "Consulte apenas os checklists finalizados por você.";
+    }
+    if (botaoLimpar) botaoLimpar.style.display = "none";
+  }
+}
+
+function renderizarHistorico() { // renderiza os registros do histórico na tela, mostrando mensagens adequadas para casos de erro ou ausência de dados
   const container = obterElemento("historyList");
   if (!container) return;
 
@@ -92,7 +120,7 @@ function renderizarHistorico() {
     `;
     return;
   }
-
+ 
   container.innerHTML = historicoCache.map((item) => {
     const processo = escaparHtml(item.processo || "-");
     const competencia = escaparHtml(item.competencia || "-");
@@ -152,13 +180,19 @@ async function carregarHistorico() {
     if (loading) loading.style.display = "flex";
     if (container) container.innerHTML = "";
 
-    historicoCache = await buscarHistoricoAPI();
+    const usuario = usuarioEhAdmin() ? "" : obterUsuarioAtual();
+    historicoCache = await buscarHistoricoAPI(usuario);
 
     if (!Array.isArray(historicoCache)) {
       historicoCache = [];
     }
 
-    historicoCache.sort((a, b) => Number(b.id || 0) - Number(a.id || 0));
+    historicoCache.sort((a, b) => {
+      const dataA = new Date(a.finalizadoEm || 0).getTime() || 0;
+      const dataB = new Date(b.finalizadoEm || 0).getTime() || 0;
+      return dataB - dataA;
+    });
+
     renderizarHistorico();
   } catch (erro) {
     console.error("Erro detalhado ao carregar histórico:", erro);
@@ -226,6 +260,8 @@ async function confirmarExclusaoHistorico() {
 }
 
 async function limparHistoricoCompleto() {
+  if (!usuarioEhAdmin()) return;
+
   const confirmou = confirm("Deseja apagar todo o histórico?");
   if (!confirmou) return;
 
@@ -241,7 +277,7 @@ async function limparHistoricoCompleto() {
 }
 
 function voltarChecklist() {
-  window.location.href = "checklist.html";
+  window.location.href = "processo.html";
 }
 
 function registrarEventosHistorico() {
@@ -283,13 +319,11 @@ function registrarEventosHistorico() {
 document.addEventListener("DOMContentLoaded", async () => {
   if (!exigirLogin() || !exigirArea()) return;
 
+  atualizarCabecalhoHistorico();
   registrarEventosHistorico();
   await carregarHistorico();
 });
 
-window.verDetalhes = verDetalhes;
 window.abrirModalConfirmacao = abrirModalConfirmacao;
-window.fecharModalConfirmacao = fecharModalConfirmacao;
-window.fecharModalDetalhes = fecharModalDetalhes;
-window.limparHistoricoCompleto = limparHistoricoCompleto;
+window.verDetalhes = verDetalhes;
 window.voltarChecklist = voltarChecklist;

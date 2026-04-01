@@ -5,10 +5,9 @@
   <title>CheckFlow - Histórico</title>
   <link rel="stylesheet" href="../CSS/style.css">
 </head>
-
-<div id="toastContainer" class="toast-container"></div>
-
 <body>
+  <div id="toastContainer" class="toast-container"></div>
+
   <div class="page">
     <div class="card card-history">
       <div class="logo">
@@ -16,8 +15,8 @@
       </div>
 
       <div class="history-header">
-        <div class="subtitle no-margin">Histórico de Checklists</div>
-        <p class="history-description">
+        <div id="tituloHistorico" class="subtitle no-margin">Histórico de Checklists</div>
+        <p id="descricaoHistorico" class="history-description">
           Consulte os checklists finalizados e remova registros quando necessário.
         </p>
       </div>
@@ -26,6 +25,7 @@
         <button class="secondary-button small-button" type="button" onclick="voltarChecklist()">
           Voltar
         </button>
+
         <button
           id="btnLimparHistorico"
           class="danger-outline-button small-button"
@@ -35,7 +35,7 @@
         </button>
       </div>
 
-     <div id="loadingHistorico" class="loading-state" style="display: none;">
+      <div id="loadingHistorico" class="loading-state" style="display: none;">
         <div class="loading-spinner"></div>
         <span>Carregando histórico...</span>
       </div>

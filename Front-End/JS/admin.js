@@ -1,5 +1,7 @@
 let tarefasAdminCache = [];
+let solicitacoesCache = [];
 let tarefaEmEdicaoId = null;
+let solicitacaoEmAtendimentoId = null;
 
 function normalizarTexto(valor) {
   return String(valor || "").trim();
@@ -32,9 +34,11 @@ function obterElementosAdmin() {
     filtroEstado: document.getElementById("filtroEstado"),
     filtroFilial: document.getElementById("filtroFilial"),
     lista: document.getElementById("listaTarefas"),
+    listaSolicitacoes: document.getElementById("listaSolicitacoes"),
     secaoFilial: document.getElementById("campoFilial"),
     btnSalvar: document.getElementById("btnSalvar"),
-    btnCancelarEdicao: document.getElementById("btnCancelarEdicao")
+    btnCancelarEdicao: document.getElementById("btnCancelarEdicao"),
+    badgeSolicitacoes: document.getElementById("badgeSolicitacoes")
   };
 }
 
@@ -142,6 +146,8 @@ function limparFormularioAdmin() {
   if (btnCancelarEdicao) btnCancelarEdicao.style.display = "none";
 
   tarefaEmEdicaoId = null;
+  solicitacaoEmAtendimentoId = null;
+
   aplicarRegraProcesso();
 }
 
@@ -247,6 +253,86 @@ function renderizarTarefasAdmin() {
     .join("");
 }
 
+function atualizarBadgeSolicitacoes() {
+  const { badgeSolicitacoes } = obterElementosAdmin();
+  if (!badgeSolicitacoes) return;
+
+  const pendentes = solicitacoesCache.filter((item) => item.status === "pendente").length;
+  badgeSolicitacoes.textContent = `Pendentes: ${pendentes}`;
+}
+
+function renderizarSolicitacoesAdmin() {
+  const { listaSolicitacoes } = obterElementosAdmin();
+  if (!listaSolicitacoes) return;
+
+  if (!solicitacoesCache.length) {
+    listaSolicitacoes.innerHTML = `<div class="empty-state">Nenhuma solicitação encontrada.</div>`;
+    atualizarBadgeSolicitacoes();
+    return;
+  }
+
+  listaSolicitacoes.innerHTML = solicitacoesCache
+    .map((item) => {
+      const id = escaparHtml(item.id);
+      const status = escaparHtml(item.status || "pendente");
+      const processo = escaparHtml(item.processo || "-");
+      const estado = escaparHtml(item.estado || "-");
+      const filial = escaparHtml(item.filial || "-");
+      const descricao = escaparHtml(item.descricao || "-");
+      const criadoPor = escaparHtml(item.criadoPor || "-");
+      const dataCriacao = escaparHtml(
+        item.dataCriacao ? new Date(item.dataCriacao).toLocaleString("pt-BR") : "-"
+      );
+
+      const podeAtender = item.status === "pendente";
+      const podeRecusar = item.status === "pendente";
+
+      return `
+        <div class="history-card">
+          <div class="history-card-header">
+            <div>
+              <h3>${processo}</h3>
+              <p><strong>Solicitante:</strong> ${criadoPor}</p>
+            </div>
+            <span class="status-badge ${status}">${status}</span>
+          </div>
+
+          <div class="history-card-body">
+            <p><strong>Estado:</strong> ${estado}</p>
+            <p><strong>Filial:</strong> ${filial}</p>
+            <p><strong>Descrição:</strong> ${descricao}</p>
+            <p><strong>Data:</strong> ${dataCriacao}</p>
+          </div>
+
+          <div class="history-card-actions">
+            ${podeAtender ? `
+              <button
+                type="button"
+                class="button secondary"
+                onclick="preencherFormularioComSolicitacao('${id}')"
+              >
+                Cadastrar tarefa
+              </button>
+            ` : ""}
+
+            ${podeRecusar ? `
+              <button
+                type="button"
+                class="button danger"
+                onclick="recusarSolicitacao('${id}')"
+              >
+                Recusar
+              </button>
+            ` : ""}
+          </div>
+        </div>
+      `;
+    })
+    .join("");
+
+  atualizarBadgeSolicitacoes();
+}
+
 async function carregarTarefasAdmin() {
   try {
     tarefasAdminCache = await buscarTarefasAdmin();
@@ -257,11 +343,25 @@ async function carregarTarefasAdmin() {
   }
 }
 
+async function carregarSolicitacoesAdmin() {
+  try {
+    solicitacoesCache = await buscarSolicitacoesAPI();
+    renderizarSolicitacoesAdmin();
+  } catch (erro) {
+    console.error("Erro ao carregar solicitações:", erro);
+    alert("Erro ao carregar solicitações.");
+  }
+}
+
 async function salvarTarefaAdmin(event) {
   if (event) event.preventDefault();
 
   try {
     const dados = coletarDadosFormularioAdmin();
+
+    if (solicitacaoEmAtendimentoId) {
+      dados.solicitacaoId = solicitacaoEmAtendimentoId;
+    }
 
     if (tarefaEmEdicaoId) {
       const tarefaAtualizada = await atualizarTarefaAPI(tarefaEmEdicaoId, dados);
@@ -279,6 +379,7 @@ async function salvarTarefaAdmin(event) {
 
     limparFormularioAdmin();
     renderizarTarefasAdmin();
+    await carregarSolicitacoesAdmin();
   } catch (erro) {
     console.error("Erro ao salvar tarefa:", erro);
     alert(erro.message || "Erro ao salvar tarefa.");
@@ -304,6 +405,7 @@ async function editarTarefa(id) {
   } = obterElementosAdmin();
 
   tarefaEmEdicaoId = tarefa.id;
+  solicitacaoEmAtendimentoId = null;
 
   if (processo) processo.value = tarefa.processo || "";
   aplicarRegraProcesso();
@@ -353,6 +455,65 @@ async function excluirTarefa(id) {
   } catch (erro) {
     console.error("Erro ao excluir tarefa:", erro);
     alert(erro.message || "Erro ao excluir tarefa.");
+  }
+}
+
+async function preencherFormularioComSolicitacao(id) {
+  const solicitacao = solicitacoesCache.find((item) => String(item.id) === String(id));
+
+  if (!solicitacao) {
+    alert("Solicitação não encontrada.");
+    return;
+  }
+
+  const {
+    processo,
+    estado,
+    filial,
+    titulo,
+    instrucao,
+    btnSalvar,
+    btnCancelarEdicao
+  } = obterElementosAdmin();
+
+  solicitacaoEmAtendimentoId = solicitacao.id;
+  tarefaEmEdicaoId = null;
+
+  if (processo) processo.value = solicitacao.processo || "";
+  aplicarRegraProcesso();
+
+  if (estado) estado.value = solicitacao.estado || "";
+
+  if (processoExigeFilial(solicitacao.processo)) {
+    await carregarFiliaisAdmin(solicitacao.estado, "filial", "Selecione a filial");
+    if (filial) filial.value = solicitacao.filial || "";
+  }
+
+  if (titulo) {
+    titulo.value = `Nova tarefa solicitada - ${solicitacao.processo}`;
+  }
+
+  if (instrucao) {
+    instrucao.value = solicitacao.descricao || "";
+  }
+
+  if (btnSalvar) btnSalvar.textContent = "Salvar tarefa e atender solicitação";
+  if (btnCancelarEdicao) btnCancelarEdicao.style.display = "inline-flex";
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+async function recusarSolicitacao(id) {
+  const confirmou = confirm("Deseja recusar esta solicitação?");
+  if (!confirmou) return;
+
+  try {
+    await atualizarStatusSolicitacaoAPI(id, "recusada");
+    await carregarSolicitacoesAdmin();
+    alert("Solicitação recusada com sucesso.");
+  } catch (erro) {
+    console.error("Erro ao recusar solicitação:", erro);
+    alert(erro.message || "Erro ao recusar solicitação.");
   }
 }
 
@@ -417,11 +578,6 @@ function registrarEventosAdmin() {
   if (btnCancelarEdicao) {
     btnCancelarEdicao.addEventListener("click", limparFormularioAdmin);
   }
-
-  const form = document.getElementById("formTarefa");
-  if (form) {
-    form.addEventListener("submit", salvarTarefaAdmin);
-  }
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -430,6 +586,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   await carregarEstadosAdmin();
   aplicarRegraProcesso();
   registrarEventosAdmin();
+  await carregarSolicitacoesAdmin();
   await carregarTarefasAdmin();
 });
 
@@ -437,3 +594,7 @@ window.editarTarefa = editarTarefa;
 window.excluirTarefa = excluirTarefa;
 window.salvarTarefaAdmin = salvarTarefaAdmin;
 window.limparFormularioAdmin = limparFormularioAdmin;
+window.preencherFormularioComSolicitacao = preencherFormularioComSolicitacao;
+window.recusarSolicitacao = recusarSolicitacao;
+window.carregarSolicitacoesAdmin = carregarSolicitacoesAdmin;
+window.carregarTarefasAdmin = carregarTarefasAdmin;

@@ -1,4 +1,4 @@
-const API_BASE_URL = window.CHECKFLOW_API_URL || "http://localhost:3000"; //no ambiente local funciona com localhost:3000
+const API_BASE_URL = window.CHECKFLOW_API_URL || "http://localhost:3000";
 
 async function request(endpoint, options = {}) {
   const url = `${API_BASE_URL}${endpoint}`;
@@ -33,9 +33,7 @@ async function request(endpoint, options = {}) {
   return null;
 }
 
-
-//TAREFAS DO CHECKLIST
-
+/* TAREFAS DO CHECKLIST */
 
 async function buscarTarefas(processo, estado, filial) {
   const params = new URLSearchParams();
@@ -47,70 +45,100 @@ async function buscarTarefas(processo, estado, filial) {
   return request(`/tarefas?${params.toString()}`);
 }
 
+/* ESTADOS E FILIAIS */
 
-// ESTADOS E FILIAIS
-
-async function buscarEstados() { // LISTA DE ESTADOS PARA O FILTRO
+async function buscarEstados() {
   return request("/estados");
 }
 
-async function buscarFiliaisPorEstado(estado) { // filiais por estado para o filtro
+async function buscarFiliaisPorEstado(estado) {
   const params = new URLSearchParams();
 
-  if (estado) {
-    params.append("estado", estado);
-  }
+  if (estado) params.append("estado", estado);
 
   return request(`/filiais?${params.toString()}`);
 }
 
-// HISTÓRICO DE TAREFAS
+/* HISTÓRICO */
 
-async function buscarHistoricoAPI() { // busca o histórico completo de tarefas, sem filtros
-  return request("/historico");
+async function buscarHistoricoAPI(usuario = "") {
+  const params = new URLSearchParams();
+
+  if (usuario) {
+    params.append("usuario", usuario);
+  }
+
+  const sufixo = params.toString() ? `?${params.toString()}` : "";
+  return request(`/historico${sufixo}`);
 }
 
-async function salvarHistoricoAPI(registro) { // salva um novo registro no histórico de tarefas
+async function salvarHistoricoAPI(registro) {
   return request("/historico", {
     method: "POST",
     body: JSON.stringify(registro)
   });
 }
 
-async function excluirHistoricoAPI(id) { // exclui um registro específico do histórico de tarefas
+async function excluirHistoricoAPI(id) {
   return request(`/historico/${encodeURIComponent(id)}`, {
     method: "DELETE"
   });
 }
 
-async function limparHistoricoAPI() { // limpa todo o histórico de tarefas
+async function limparHistoricoAPI() {
   return request("/historico", {
     method: "DELETE"
   });
 }
 
-//DMIN - TAREFAS EXTRAS
+/* ADMIN - TAREFAS EXTRAS */
 
-async function buscarTarefasAdmin() { // busca todas as tarefas extras criadas pelo admin, sem filtros
+async function buscarTarefasAdmin() {
   return request("/admin/tarefas");
 }
 
-async function criarTarefaAPI(tarefa) { // cria uma nova tarefa extra no sistema, associada a um processo específico
+async function criarTarefaAPI(tarefa) {
   return request("/admin/tarefas", {
     method: "POST",
     body: JSON.stringify(tarefa)
   });
 }
 
-async function atualizarTarefaAPI(id, tarefa) { // atualiza os detalhes de uma tarefa extra existente, identificada por seu ID
+async function atualizarTarefaAPI(id, tarefa) {
   return request(`/admin/tarefas/${encodeURIComponent(id)}`, {
     method: "PUT",
     body: JSON.stringify(tarefa)
   });
 }
 
-async function excluirTarefaAPI(id) { // exclui uma tarefa extra específica do sistema, identificada por seu ID
+async function excluirTarefaAPI(id) {
   return request(`/admin/tarefas/${encodeURIComponent(id)}`, {
     method: "DELETE"
+  });
+}
+
+/* SOLICITAÇÕES */
+
+async function buscarSolicitacoesAPI(filtros = {}) {
+  const params = new URLSearchParams();
+
+  if (filtros.status) params.append("status", filtros.status);
+  if (filtros.criadoPor) params.append("criadoPor", filtros.criadoPor);
+
+  const sufixo = params.toString() ? `?${params.toString()}` : "";
+  return request(`/solicitacoes${sufixo}`);
+}
+
+async function criarSolicitacaoAPI(payload) {
+  return request("/solicitacoes", {
+    method: "POST",
+    body: JSON.stringify(payload)
+  });
+}
+
+async function atualizarStatusSolicitacaoAPI(id, status) {
+  return request(`/solicitacoes/${encodeURIComponent(id)}/status`, {
+    method: "PATCH",
+    body: JSON.stringify({ status })
   });
 }

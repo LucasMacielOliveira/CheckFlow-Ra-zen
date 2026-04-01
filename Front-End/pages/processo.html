@@ -5,10 +5,9 @@
   <title>CheckFlow - Processo</title>
   <link rel="stylesheet" href="../CSS/style.css">
 </head>
-
-<div id="toastContainer" class="toast-container"></div>
-
 <body>
+  <div id="toastContainer" class="toast-container"></div>
+
   <div class="page">
     <div class="card">
       <div class="logo">
@@ -21,7 +20,19 @@
         <button class="secondary-button" onclick="selecionarProcesso('Apuração')">Apuração</button>
         <button class="secondary-button" onclick="selecionarProcesso('SPED')">SPED</button>
         <button class="secondary-button" onclick="selecionarProcesso('SCANC')">SCANC</button>
-        <button class="history-nav-button" onclick="irParaHistorico()">Ver histórico</button>
+
+        <button class="history-nav-button" onclick="irParaHistorico()">
+          Ver histórico
+        </button>
+
+        <button
+          id="botaoSolicitacao"
+          class="secondary-button"
+          style="display: none;"
+          onclick="irParaSolicitacao()"
+        >
+          Solicitar tarefa
+        </button>
 
         <button
           id="botaoAdmin"
@@ -69,6 +80,14 @@
       window.location.href = "historico.html";
     }
 
+    function irParaSolicitacao() {
+      if (!exigirLogin() || !exigirArea()) {
+        return;
+      }
+
+      window.location.href = "solicitacao.html";
+    }
+
     function irParaAdmin() {
       if (!exigirLogin() || !exigirArea() || !exigirAdmin()) {
         return;
@@ -77,19 +96,22 @@
       window.location.href = "admin.html";
     }
 
-    function mostrarBotaoAdminSeNecessario() {
-      const perfil = localStorage.getItem("perfilUsuario");
+    function configurarBotoesPorPerfil() {
+      const perfil = lerTexto("perfilUsuario");
       const botaoAdmin = document.getElementById("botaoAdmin");
+      const botaoSolicitacao = document.getElementById("botaoSolicitacao");
 
-      if (perfil === "admin") {
-        botaoAdmin.style.display = "block";
-      } else {
-        botaoAdmin.style.display = "none";
+      if (botaoAdmin) {
+        botaoAdmin.style.display = perfil === "admin" ? "block" : "none";
+      }
+
+      if (botaoSolicitacao) {
+        botaoSolicitacao.style.display = perfil === "admin" ? "none" : "block";
       }
     }
 
     if (exigirLogin() && exigirArea()) {
-      mostrarBotaoAdminSeNecessario();
+      configurarBotoesPorPerfil();
     }
   </script>
 </body>

@@ -6,13 +6,11 @@
   <title>CheckFlow - Admin</title>
   <link rel="stylesheet" href="../CSS/style.css">
 </head>
-
-<div id="toastContainer" class="toast-container"></div>
-
 <body>
+  <div id="toastContainer" class="toast-container"></div>
+
   <div class="page">
     <div class="card admin-card">
-
       <div class="logo">
         <img src="../assets/checkflow-logo.png" alt="CheckFlow">
       </div>
@@ -20,14 +18,16 @@
       <div class="history-header">
         <div class="subtitle no-margin">Painel Admin</div>
         <p class="history-description">
-          Cadastre, visualize, edite e exclua tarefas complementares do sistema.
+          Gerencie tarefas complementares e acompanhe as solicitações recebidas dos analistas.
         </p>
       </div>
 
       <div class="admin-layout">
-
         <section class="admin-form-card">
-          <h3 class="selection-title">Nova tarefa</h3>
+          <div class="admin-list-header">
+            <h3 class="selection-title">Nova tarefa</h3>
+            <span id="badgeSolicitacoes" class="status-badge pendente">Pendentes: 0</span>
+          </div>
 
           <label for="processo" class="admin-label">Processo</label>
           <select id="processo" class="input">
@@ -42,10 +42,12 @@
             <option value="">Selecione</option>
           </select>
 
-          <label for="filial" class="admin-label">Filial</label>
-          <select id="filial" class="input">
-            <option value="">Sem filial específica</option>
-          </select>
+          <div id="campoFilial">
+            <label for="filial" class="admin-label">Filial</label>
+            <select id="filial" class="input">
+              <option value="">Selecione a filial</option>
+            </select>
+          </div>
 
           <label for="titulo" class="admin-label">Título da tarefa</label>
           <input
@@ -63,22 +65,41 @@
           ></textarea>
 
           <div class="admin-actions">
-            <button
-              id="botaoSalvarTarefa"
-              class="button"
-              type="button"
-              onclick="salvarTarefa()"
-            >
+            <button id="btnSalvar" class="button" type="button" onclick="salvarTarefaAdmin()">
               Salvar tarefa
             </button>
 
             <button
+              id="btnCancelarEdicao"
               class="secondary-button small-button"
               type="button"
+              style="display: none;"
               onclick="limparFormularioAdmin()"
             >
               Cancelar edição
             </button>
+          </div>
+        </section>
+
+        <section class="admin-list-card">
+          <div class="admin-list-header">
+            <h3 class="selection-title">Caixa de entrada do admin</h3>
+
+            <button
+              class="secondary-button small-button"
+              type="button"
+              onclick="carregarSolicitacoesAdmin()"
+            >
+              Atualizar
+            </button>
+          </div>
+
+          <div id="listaSolicitacoes" class="history-list">
+            <div class="empty-history">
+              <div class="empty-history-icon">📥</div>
+              <h3>Carregando solicitações...</h3>
+              <p>Aguarde enquanto buscamos os pedidos dos analistas.</p>
+            </div>
           </div>
         </section>
 
@@ -89,7 +110,7 @@
             <button
               class="secondary-button small-button"
               type="button"
-              onclick="carregarTarefasAdminTela()"
+              onclick="carregarTarefasAdmin()"
             >
               Atualizar
             </button>
@@ -107,22 +128,12 @@
               <option value="">Todos os estados</option>
             </select>
 
-            <input
-              id="filtroFilial"
-              class="input"
-              type="text"
-              placeholder="Filtrar por filial"
-            >
-
-            <input
-              id="filtroTexto"
-              class="input"
-              type="text"
-              placeholder="Buscar por título"
-            >
+            <select id="filtroFilial" class="input">
+              <option value="">Todas as filiais</option>
+            </select>
           </div>
 
-          <div id="listaTarefasAdmin" class="history-list">
+          <div id="listaTarefas" class="history-list">
             <div class="empty-history">
               <div class="empty-history-icon">📋</div>
               <h3>Carregando tarefas...</h3>
@@ -130,7 +141,6 @@
             </div>
           </div>
         </section>
-
       </div>
 
       <div class="footer-brand">

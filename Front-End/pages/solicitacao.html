@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>CheckFlow - Solicitar tarefa</title>
+  <link rel="stylesheet" href="../CSS/style.css">
+</head>
+<body>
+  <div id="toastContainer" class="toast-container"></div>
+
+  <div class="page">
+    <div class="card admin-card">
+      <div class="logo">
+        <img src="../assets/checkflow-logo.png" alt="CheckFlow">
+      </div>
+
+      <div class="history-header">
+        <div class="subtitle no-margin">Solicitar tarefa</div>
+        <p class="history-description">
+          Registre uma necessidade operacional para análise do administrador.
+        </p>
+      </div>
+
+      <section class="admin-form-card">
+        <label for="processoSolicitacao" class="admin-label">Processo</label>
+        <select id="processoSolicitacao" class="input">
+          <option value="">Selecione</option>
+          <option value="Apuração">Apuração</option>
+          <option value="SPED">SPED</option>
+          <option value="SCANC">SCANC</option>
+        </select>
+
+        <label for="estadoSolicitacao" class="admin-label">Estado</label>
+        <select id="estadoSolicitacao" class="input">
+          <option value="">Selecione</option>
+        </select>
+
+        <div id="grupoFilialSolicitacao">
+          <label for="filialSolicitacao" class="admin-label">Filial</label>
+          <select id="filialSolicitacao" class="input">
+            <option value="">Selecione</option>
+          </select>
+        </div>
+
+        <label for="descricaoSolicitacao" class="admin-label">Descrição da necessidade</label>
+        <textarea
+          id="descricaoSolicitacao"
+          class="input admin-textarea"
+          placeholder="Descreva a necessidade da tarefa"
+        ></textarea>
+
+        <div class="admin-actions">
+          <button class="button" type="button" onclick="enviarSolicitacao()">
+            Enviar solicitação
+          </button>
+
+          <button class="secondary-button small-button" type="button" onclick="voltarProcessos()">
+            Voltar
+          </button>
+        </div>
+      </section>
+
+      <div class="footer-brand">
+        <img src="../assets/raizen-logo.png" alt="Raízen">
+      </div>
+    </div>
+  </div>
+
+  <script src="../JS/storage.js"></script>
+  <script src="../JS/auth.js"></script>
+  <script src="../JS/api.js"></script>
+  <script src="../JS/solicitacao.js"></script>
+</body>
+</html>
