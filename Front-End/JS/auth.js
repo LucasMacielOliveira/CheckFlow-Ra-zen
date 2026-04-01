@@ -1,5 +1,5 @@
 function exigirLogin() {
-  const usuario = localStorage.getItem("usuarioLogado");
+  const usuario = obterUsuarioLogado();
 
   if (!usuario || usuario.trim() === "") {
     alert("Você precisa fazer login para acessar esta página.");
@@ -11,7 +11,7 @@ function exigirLogin() {
 }
 
 function exigirArea() {
-  const area = localStorage.getItem("areaSelecionada");
+  const area = lerTexto("areaSelecionada");
 
   if (!area || area.trim() === "") {
     alert("Selecione uma área antes de continuar.");
@@ -23,7 +23,7 @@ function exigirArea() {
 }
 
 function exigirProcesso() {
-  const processo = localStorage.getItem("processoSelecionado");
+  const processo = lerTexto("processoSelecionado");
 
   if (!processo || processo.trim() === "") {
     alert("Selecione um processo antes de continuar.");
@@ -34,20 +34,14 @@ function exigirProcesso() {
   return true;
 }
 
-function obterPerfilUsuario() {
-  return localStorage.getItem("perfilUsuario")
+function exigirAdmin() {
+  const perfil = obterPerfilUsuario();
+
+  if (perfil !== "admin") {
+    alert("Acesso negado. Esta página é restrita a administradores.");
+    window.location.href = "index.html";
+    return false;
   }
 
-  function exigirAdmin (){
-
-    const perfil = obterPerfilUsuario();
-
-    if (perfil !== "admin") {
-      alert("Acesso negado. Esta página é restrita a administradores.");
-      window.location.href = "index.html";
-      return false;
-    }
-
-    return true
-    
-  }
+  return true;
+}

@@ -1,5 +1,5 @@
 function salvarTexto(chave, valor) {
-  localStorage.setItem(chave, valor);
+  localStorage.setItem(chave, String(valor ?? ""));
 }
 
 function lerTexto(chave) {
@@ -7,12 +7,18 @@ function lerTexto(chave) {
 }
 
 function salvarLista(chave, valor) {
-  localStorage.setItem(chave, JSON.stringify(valor));
+  const lista = Array.isArray(valor) ? valor : [];
+  localStorage.setItem(chave, JSON.stringify(lista));
 }
 
 function lerLista(chave) {
   const valor = localStorage.getItem(chave);
-  return valor ? JSON.parse(valor) : [];
+
+  try {
+    return valor ? JSON.parse(valor) : [];
+  } catch {
+    return [];
+  }
 }
 
 function removerItem(chave) {
@@ -26,30 +32,12 @@ function limparFluxo() {
   removerItem("competenciaSelecionada");
 }
 
-function lerHistoricoChecklists() {
-  return lerLista("historicoChecklists");
+function obterUsuarioLogado() {
+  return lerTexto("usuarioLogado");
 }
 
-function salvarHistoricoChecklists(lista) {
-  salvarLista("historicoChecklists", lista);
-}
-
-function adicionarHistoricoChecklist(registro) {
-  const historico = lerHistoricoChecklists();
-  historico.unshift(registro);
-  salvarHistoricoChecklists(historico);
-}
-
-function excluirHistoricoChecklist(id) {
-  const historico = lerHistoricoChecklists();
-  const atualizado = historico.filter(function (item) {
-    return item.id !== id;
-  });
-  salvarHistoricoChecklists(atualizado);
-}
-
-function limparHistoricoChecklists() {
-  removerItem("historicoChecklists");
+function obterPerfilUsuario() {
+  return lerTexto("perfilUsuario");
 }
 
 function mostrarToast(mensagem, tipo = "info") {
@@ -65,6 +53,9 @@ function mostrarToast(mensagem, tipo = "info") {
   setTimeout(() => {
     toast.style.opacity = "0";
     toast.style.transform = "translateX(40px)";
-    setTimeout(() => toast.remove(), 300);
+
+    setTimeout(() => {
+      toast.remove();
+    }, 300);
   }, 3000);
 }
