@@ -302,52 +302,21 @@ app.get("/historico", (req, res) => {
 
     if (usuario) {
       historico = historico.filter(
-        (item) => normalizarTexto(item.usuario).toLowerCase() === usuario.toLowerCase()
+        (item) =>
+          normalizarTexto(item.usuario).toLowerCase() === usuario.toLowerCase()
       );
     }
+
+    historico.sort((a, b) => {
+      const dataA = new Date(a.finalizadoEmIso || a.finalizadoEm || 0).getTime() || 0;
+      const dataB = new Date(b.finalizadoEmIso || b.finalizadoEm || 0).getTime() || 0;
+      return dataB - dataA;
+    });
 
     return res.json(historico);
   } catch (error) {
     console.error("Erro ao listar histórico:", error);
     return res.status(500).json({ erro: "Erro ao listar histórico." });
-  }
-});
-
-app.post("/historico", (req, res) => {
-  try {
-    const payload = req.body || {};
-
-    const novoRegistro = {
-      id: payload.id ? String(payload.id) : gerarId("hist"),
-      processo: normalizarTexto(payload.processo),
-      competencia: normalizarTexto(payload.competencia),
-      estados: Array.isArray(payload.estados) ? payload.estados : [],
-      filiais: Array.isArray(payload.filiais) ? payload.filiais : [],
-      usuario: normalizarTexto(payload.usuario),
-      finalizadoEm: normalizarTexto(payload.finalizadoEm) || new Date().toLocaleString("pt-BR"),
-      status: normalizarTexto(payload.status) || "finalizado",
-      totalTarefas: Number(payload.totalTarefas || 0),
-      concluidas: Number(payload.concluidas || 0),
-      tarefas: Array.isArray(payload.tarefas)
-        ? payload.tarefas.map((tarefa) => ({
-            titulo: normalizarTexto(tarefa?.titulo),
-            concluida: Boolean(tarefa?.concluida)
-          }))
-        : []
-    };
-
-    if (!novoRegistro.processo) {
-      return res.status(400).json({ erro: "Processo é obrigatório." });
-    }
-
-    const historico = lerHistorico();
-    historico.push(novoRegistro);
-    salvarHistorico(historico);
-
-    return res.status(201).json(novoRegistro);
-  } catch (error) {
-    console.error("Erro ao salvar histórico:", error);
-    return res.status(500).json({ erro: "Erro ao salvar histórico." });
   }
 });
 

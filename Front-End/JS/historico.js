@@ -187,11 +187,11 @@ async function carregarHistorico() {
       historicoCache = [];
     }
 
-    historicoCache.sort((a, b) => {
-      const dataA = new Date(a.finalizadoEm || 0).getTime() || 0;
-      const dataB = new Date(b.finalizadoEm || 0).getTime() || 0;
-      return dataB - dataA;
-    });
+   historicoCache.sort((a, b) => {
+  const dataA = new Date(a.finalizadoEmIso || a.finalizadoEm || 0).getTime() || 0;
+  const dataB = new Date(b.finalizadoEmIso || b.finalizadoEm || 0).getTime() || 0;
+  return dataB - dataA;
+});
 
     renderizarHistorico();
   } catch (erro) {
