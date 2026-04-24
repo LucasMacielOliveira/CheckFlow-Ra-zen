@@ -387,13 +387,11 @@ async function salvarFinalizacaoChecklist() {
   }));
 
   const registro = {
-    id: String(Date.now()),
     processo,
     competencia,
     estados,
     filiais,
     usuario,
-    finalizadoEm: new Date().toLocaleString("pt-BR"),
     status: "finalizado",
     totalTarefas: tarefasDetalhadas.length,
     concluidas: tarefasDetalhadas.filter((t) => t.concluida).length,
@@ -402,7 +400,11 @@ async function salvarFinalizacaoChecklist() {
 
   console.log("REGISTRO ENVIADO:", registro);
 
-  return await salvarHistoricoAPI(registro);
+  const resposta = await salvarHistoricoAPI(registro);
+
+  limparProgressoChecklist();
+
+  return resposta;
 }
 
 // =======================
@@ -424,7 +426,8 @@ async function validarChecklist() {
     finalizandoChecklist = true;
     atualizarEstadoBotaoFinalizar();
 
-    await salvarFinalizacaoChecklist();
+    const historicoSalvo = await salvarFinalizacaoChecklist();
+    console.log("HISTÓRICO SALVO:", historicoSalvo);
 
     if (typeof confetti === "function") {
       confetti({
@@ -436,7 +439,7 @@ async function validarChecklist() {
 
     const modalSucesso = $("modalSucesso");
     if (!modalSucesso) {
-      console.error('modalSucesso não encontrado no HTML');
+      console.error("modalSucesso não encontrado no HTML");
       mostrarMensagem("Erro ao abrir confirmação de sucesso.", "error");
       return;
     }
@@ -450,7 +453,6 @@ async function validarChecklist() {
     atualizarEstadoBotaoFinalizar();
   }
 }
-
 // =======================
 // MODAIS E REDIRECIONAMENTO
 // =======================
