@@ -71,6 +71,68 @@ async function saveHistory(registro) {
   }
 }
 
+async function findHistory(usuario = "") {
+  const params = [];
+  let filtroUsuario = "";
+
+  if (usuario) {
+    params.push(usuario);
+    filtroUsuario = "WHERE LOWER(c.usuario) = LOWER($1)";
+  }
+
+  const result = await pool.query(
+    `
+    SELECT
+      c.id,
+      c.processo,
+      c.competencia,
+      c.usuario,
+      c.status,
+      c.finalizado_em AS "finalizadoEmIso",
+      TO_CHAR(c.finalizado_em, 'DD/MM/YYYY, HH24:MI:SS') AS "finalizadoEm",
+
+      COALESCE(
+        JSON_AGG(DISTINCT ce.estado) FILTER (WHERE ce.estado IS NOT NULL),
+        '[]'
+      ) AS estados,
+
+      COALESCE(
+        JSON_AGG(DISTINCT cf.filial) FILTER (WHERE cf.filial IS NOT NULL),
+        '[]'
+      ) AS filiais,
+
+      COALESCE(
+        JSON_AGG(
+          DISTINCT JSONB_BUILD_OBJECT(
+            'titulo', ct.titulo,
+            'concluida', ct.concluida
+          )
+        ) FILTER (WHERE ct.id IS NOT NULL),
+        '[]'
+      ) AS tarefas,
+
+      COUNT(DISTINCT ct.id)::int AS "totalTarefas",
+      COUNT(DISTINCT ct.id) FILTER (WHERE ct.concluida = true)::int AS concluidas
+
+    FROM checklists c
+    LEFT JOIN checklist_estados ce
+      ON ce.checklist_id = c.id
+    LEFT JOIN checklist_filiais cf
+      ON cf.checklist_id = c.id
+    LEFT JOIN checklist_tarefas ct
+      ON ct.checklist_id = c.id
+
+    ${filtroUsuario}
+
+    GROUP BY c.id
+    ORDER BY c.finalizado_em DESC
+    `,
+    params
+  );
+
+  return result.rows;
+}
 module.exports = {
-  saveHistory
+  saveHistory,
+  findHistory
 };

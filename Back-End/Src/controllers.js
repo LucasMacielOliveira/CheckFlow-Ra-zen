@@ -9,8 +9,13 @@ const {
 } = require("./data");
 
 const {
-  saveHistory
+  saveHistory,  
+  findHistory
 } = require("./repositorios/historico.repository");
+
+const {
+  getDashboardSummary
+} = require("./repositorios/dashboard.repository");
 
 // DADOS FIXOS
 
@@ -288,32 +293,18 @@ function getTarefas(req, res) {
   }
 }
 
-function getHistorico(req, res) {
+async function getHistorico(req, res) {
   try {
     const usuario = normalizarTexto(req.query.usuario);
-    let historico = lerHistorico();
 
-    if (!Array.isArray(historico)) {
-      historico = [];
-    }
-
-    if (usuario) {
-      historico = historico.filter(
-        (item) =>
-          normalizarTexto(item.usuario).toLowerCase() === usuario.toLowerCase()
-      );
-    }
-
-    historico.sort((a, b) => {
-      const dataA = new Date(a.finalizadoEmIso || a.finalizadoEm || 0).getTime() || 0;
-      const dataB = new Date(b.finalizadoEmIso || b.finalizadoEm || 0).getTime() || 0;
-      return dataB - dataA;
-    });
+    const historico = await findHistory(usuario);
 
     return res.json(historico);
   } catch (error) {
-    console.error("Erro ao listar histórico:", error);
-    return res.status(500).json({ erro: "Erro ao listar histórico." });
+    console.error("Erro ao listar histórico no banco:", error);
+    return res.status(500).json({
+      erro: "Erro ao listar histórico."
+    });
   }
 }
 
