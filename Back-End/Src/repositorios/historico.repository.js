@@ -1,7 +1,14 @@
 const pool = require("../db");
 
 async function saveHistory(registro) {
-  const client = await pool.connect();
+   
+  console.log("ENTROU NO REPOSITORY");
+  console.log("REGISTRO:", registro);
+
+  const testeBanco = await pool.query("SELECT current_database()");
+  console.log("BANCO USADO PELO NODE:", testeBanco.rows);
+
+    const client = await pool.connect();
 
   try {
     await client.query("BEGIN");
@@ -21,6 +28,7 @@ async function saveHistory(registro) {
     );
 
     const checklist = checklistResult.rows[0];
+    console.log("CHECKLIST INSERIDO:", checklist);
 
     for (const estado of registro.estados || []) {
       await client.query(
