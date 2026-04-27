@@ -8,6 +8,10 @@ const {
   salvarSolicitacoes
 } = require("./data");
 
+const {
+  saveHistory
+} = require("./repositorios/historico.repository");
+
 // DADOS FIXOS
 
 const filiaisPorEstado = {
@@ -313,7 +317,10 @@ function getHistorico(req, res) {
   }
 }
 
-function postHistorico(req, res) {
+async function postHistorico(req, res) {
+    console.log("CHEGOU NO POST /historico");
+    console.log("BODY RECEBIDO:", req.body);
+    
   try {
     const validacao = validarHistorico(req.body || {});
 
@@ -321,30 +328,30 @@ function postHistorico(req, res) {
       return res.status(400).json({ erro: validacao.erro });
     }
 
-    const historico = lerHistorico();
-    const agora = new Date();
-
-    const novoRegistro = {
-      id: gerarId("hist"),
+    const registro = {
       processo: validacao.processo,
       competencia: validacao.competencia,
       estados: validacao.estados,
       filiais: validacao.filiais,
       usuario: validacao.usuario,
-      finalizadoEm: agora.toLocaleString("pt-BR"),
-      finalizadoEmIso: agora.toISOString(),
       status: validacao.status,
       totalTarefas: validacao.totalTarefas,
       concluidas: validacao.concluidas,
       tarefas: validacao.tarefas
     };
 
-    historico.push(novoRegistro);
-    salvarHistorico(historico);
+    const checklistSalvo = await saveHistory(registro);
 
-    return res.status(201).json(novoRegistro);
+    return res.status(201).json({
+      id: checklistSalvo.id,
+      processo: checklistSalvo.processo,
+      competencia: checklistSalvo.competencia,
+      usuario: checklistSalvo.usuario,
+      status: checklistSalvo.status,
+      finalizadoEmIso: checklistSalvo.finalizado_em
+    });
   } catch (error) {
-    console.error("Erro ao salvar histórico:", error);
+    console.error("Erro ao salvar histórico no banco:", error);
     return res.status(500).json({ erro: "Erro ao salvar histórico." });
   }
 }
