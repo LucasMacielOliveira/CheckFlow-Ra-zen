@@ -30,4 +30,8 @@ router.post("/admin/tarefas", controllers.postAdminTarefa);
 router.put("/admin/tarefas/:id", controllers.putAdminTarefa);
 router.delete("/admin/tarefas/:id", controllers.deleteAdminTarefa);
 
+// Dashboard
+router.get("/dashboard/resumo", controllers.getDashboard);
+
+
 module.exports = router;

@@ -20,11 +20,6 @@
         <button class="secondary-button" onclick="selecionarProcesso('Apuração')">Apuração</button>
         <button class="secondary-button" onclick="selecionarProcesso('SPED')">SPED</button>
         <button class="secondary-button" onclick="selecionarProcesso('SCANC')">SCANC</button>
-
-        <button class="history-nav-button" onclick="irParaHistorico()">
-          Ver histórico
-        </button>
-
         <button
           id="botaoSolicitacao"
           class="secondary-button"
@@ -33,6 +28,15 @@
         >
           Solicitar tarefa
         </button>
+
+        <button class="history-nav-button" onclick="irParaHistorico()">
+          Ver histórico
+        </button>
+
+        <button class="history-nav-button" onclick="irParaDashboard()">
+          Dashboard
+        </button>
+
 
         <button
           id="botaoAdmin"
@@ -110,9 +114,18 @@
       }
     }
 
+
     if (exigirLogin() && exigirArea()) {
       configurarBotoesPorPerfil();
     }
+
+    function irParaDashboard() {
+  if (!exigirLogin() || !exigirArea()) {
+    return;
+  }
+
+  window.location.href = "dashboard.html";
+}
   </script>
 </body>
 </html>

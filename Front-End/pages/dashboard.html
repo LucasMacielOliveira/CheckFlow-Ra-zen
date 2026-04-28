@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>CheckFlow - Dashboard</title>
+  <link rel="stylesheet" href="../CSS/style.css">
+</head>
+<body>
+  <div id="toastContainer" class="toast-container"></div>
+
+  <div class="page">
+    <div class="card admin-card">
+      <div class="logo">
+        <img src="../assets/checkflow-logo.png" alt="CheckFlow">
+      </div>
+
+      <div class="history-header">
+        <div class="subtitle no-margin">Dashboard CheckFlow</div>
+        <p class="history-description">
+          Indicadores gerais dos checklists finalizados.
+        </p>
+      </div>
+
+      <div id="loadingDashboard" class="loading-state" style="display: none;">
+        <div class="loading-spinner"></div>
+        <span>Carregando dashboard...</span>
+      </div>
+
+      <section class="dashboard-grid">
+        <div class="dashboard-card">
+          <span class="dashboard-label">Checklists finalizados</span>
+          <strong id="totalChecklists">0</strong>
+        </div>
+
+        <div class="dashboard-card">
+          <span class="dashboard-label">Tarefas registradas</span>
+          <strong id="totalTarefas">0</strong>
+        </div>
+
+        <div class="dashboard-card">
+          <span class="dashboard-label">Tarefas concluídas</span>
+          <strong id="tarefasConcluidas">0</strong>
+        </div>
+
+        <div class="dashboard-card">
+          <span class="dashboard-label">Taxa de conclusão</span>
+          <strong id="taxaConclusao">0%</strong>
+        </div>
+      </section>
+
+      <section class="dashboard-section">
+        <h3>Checklists por processo</h3>
+        <div id="listaPorProcesso" class="dashboard-list"></div>
+      </section>
+
+      <section class="dashboard-section">
+        <h3>Produtividade por usuário</h3>
+        <div id="listaPorUsuario" class="dashboard-list"></div>
+      </section>
+
+      <section class="dashboard-section">
+        <h3>Checklists por mês</h3>
+        <div id="listaPorMes" class="dashboard-list"></div>
+      </section>
+
+      <div class="button-row actions-inline">
+        <button class="secondary-button small-button" type="button" onclick="voltarProcessos()">
+          Voltar
+        </button>
+
+        <button class="history-nav-button small-button" type="button" onclick="carregarDashboard()">
+          Atualizar
+        </button>
+      </div>
+
+      <div class="footer-brand">
+        <img src="../assets/raizen-logo.png" alt="Raízen">
+      </div>
+    </div>
+  </div>
+
+  <script src="../JS/storage.js"></script>
+  <script src="../JS/auth.js"></script>
+  <script src="../JS/api.js"></script>
+  <script src="../JS/dashboard.js"></script>
+</body>
+</html>

@@ -586,6 +586,20 @@ function deleteAdminTarefa(req, res) {
   }
 }
 
+async function getDashboard(req, res) {
+  try {
+    const resumo = await getDashboardSummary();
+
+    return res.json(resumo);
+  } catch (error) {
+    console.error("Erro ao carregar dashboard:", error);
+
+    return res.status(500).json({
+      erro: "Erro ao carregar dashboard."
+    });
+  }
+}
+
 module.exports = {
   healthCheck,
   getEstados,
@@ -601,5 +615,6 @@ module.exports = {
   getAdminTarefas,
   postAdminTarefa,
   putAdminTarefa,
-  deleteAdminTarefa
+  deleteAdminTarefa,
+  getDashboard
 };
