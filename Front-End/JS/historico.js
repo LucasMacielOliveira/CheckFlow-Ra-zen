@@ -180,22 +180,26 @@ async function carregarHistorico() {
     if (loading) loading.style.display = "flex";
     if (container) container.innerHTML = "";
 
-    const usuario = usuarioEhAdmin() ? "" : obterUsuarioAtual();
-    historicoCache = await buscarHistoricoAPI(usuario);
+    // TEMPORÁRIO: busca todo o histórico do banco
+    // Antes estava filtrando pelo usuário logado e podia vir vazio.
+    historicoCache = await buscarHistoricoAPI("");
+
+    console.log("HISTÓRICO RECEBIDO NO FRONT:", historicoCache);
 
     if (!Array.isArray(historicoCache)) {
       historicoCache = [];
     }
 
-   historicoCache.sort((a, b) => {
-  const dataA = new Date(a.finalizadoEmIso || a.finalizadoEm || 0).getTime() || 0;
-  const dataB = new Date(b.finalizadoEmIso || b.finalizadoEm || 0).getTime() || 0;
-  return dataB - dataA;
-});
+    historicoCache.sort((a, b) => {
+      const dataA = new Date(a.finalizadoEmIso || a.finalizadoEm || 0).getTime() || 0;
+      const dataB = new Date(b.finalizadoEmIso || b.finalizadoEm || 0).getTime() || 0;
+      return dataB - dataA;
+    });
 
     renderizarHistorico();
   } catch (erro) {
     console.error("Erro detalhado ao carregar histórico:", erro);
+
     if (container) {
       container.innerHTML = `
         <div class="empty-state">
