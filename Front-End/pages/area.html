@@ -33,6 +33,13 @@
   <script src="../JS/storage.js"></script>
   <script src="../JS/auth.js"></script>
   <script>
+    document.addEventListener("DOMContentLoaded", () => {
+  if (!exigirLogin()) return;
+
+  iniciarPagina();
+});
+    
+    
     function entrarMobilidade() {
       if (!exigirLogin()) {
         return;

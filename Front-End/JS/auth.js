@@ -45,3 +45,57 @@ function exigirAdmin() {
 
   return true;
 }
+
+async function fazerLogin() {
+  const usuario = document.getElementById("usuario")?.value.trim();
+  const senha = document.getElementById("senha")?.value.trim();
+
+  if (!usuario) {
+    alert("Digite o usuário.");
+    return;
+  }
+
+  if (!senha) {
+    alert("Digite a senha.");
+    return;
+  }
+
+  try {
+    const usuarioAutenticado = await request("/login", {
+      method: "POST",
+      body: JSON.stringify({
+        usuario,
+        senha
+      })
+    });
+
+    salvarTexto("usuarioLogado", usuarioAutenticado.nome);
+    salvarTexto("usuarioSistema", usuarioAutenticado.usuario);
+    salvarTexto("perfilUsuario", usuarioAutenticado.perfil);
+    salvarTexto("areaSelecionada", usuarioAutenticado.area);
+    salvarTexto("usuarioId", usuarioAutenticado.id);
+
+    window.location.href = "area.html";
+  } catch (erro) {
+    alert(erro?.message || "Erro ao fazer login.");
+  }
+}
+
+function salvarUsuarioLogado(usuario) {
+  localStorage.setItem("usuarioLogado", usuario.nome);
+  localStorage.setItem("perfilUsuario", usuario.perfil);
+  localStorage.setItem("areaSelecionada", usuario.area);
+  localStorage.setItem("usuarioId", usuario.id);
+}
+
+
+function exigirLogin() {
+  const usuario = localStorage.getItem ("usuarioLogado");
+
+  if(!usuario){
+    window.location.href = "index.html";
+    return false;
+  }
+
+  return true;
+}

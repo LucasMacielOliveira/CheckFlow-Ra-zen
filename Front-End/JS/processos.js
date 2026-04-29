@@ -1,3 +1,9 @@
+document.addEventListener("DOMContentLoaded", () => {
+  if (!exigirLogin()) return;
+
+  iniciarPagina();
+});
+
 const processosConfig = {
   "Apuração": {
     usaEstado: true,

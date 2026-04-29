@@ -33,4 +33,7 @@ router.delete("/admin/tarefas/:id", controllers.deleteAdminTarefa);
 // Dashboard
 router.get("/dashboard/resumo", controllers.getDashboard);
 
+// Auth
+router.post("/login", controllers.login);
+
 module.exports = router;

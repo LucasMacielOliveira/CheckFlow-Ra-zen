@@ -19,12 +19,14 @@ function montarFiltrosDashboard(filtros = {}) {
     condicoes.push(`c.processo = $${params.length}`);
   }
 
+  if (filtros.usuario) {
+    params.push(filtros.usuario);
+    condicoes.push(`LOWER(c.usuario) = LOWER($${params.length})`);
+  }
+
   const where = condicoes.length ? `WHERE ${condicoes.join(" AND ")}` : "";
 
-  return {
-    where,
-    params
-  };
+  return { where, params };
 }
 
 async function getDashboardSummary(filtros = {}) {

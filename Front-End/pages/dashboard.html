@@ -25,6 +25,37 @@
         <div class="loading-spinner"></div>
         <span>Carregando dashboard...</span>
       </div>
+<section class="dashboard-filters">
+  <div class="filter-group">
+    <label for="filtroDataInicio">Data inicial</label>
+    <input id="filtroDataInicio" class="input" type="date">
+  </div>
+
+  <div class="filter-group">
+    <label for="filtroDataFim">Data final</label>
+    <input id="filtroDataFim" class="input" type="date">
+  </div>
+
+  <div class="filter-group">
+    <label for="filtroProcesso">Processo</label>
+    <select id="filtroProcesso" class="input">
+      <option value="">Todos</option>
+      <option value="Apuração">Apuração</option>
+      <option value="SPED">SPED</option>
+      <option value="SCANC">SCANC</option>
+    </select>
+  </div>
+
+  <div class="filter-actions">
+    <button class="button small-button" type="button" onclick="aplicarFiltrosDashboard()">
+      Aplicar filtros
+    </button>
+
+    <button class="secondary-button small-button" type="button" onclick="limparFiltrosDashboard()">
+      Limpar
+    </button>
+  </div>
+</section>
 
       <section class="dashboard-grid">
         <div class="dashboard-card">
@@ -47,6 +78,7 @@
           <strong id="taxaConclusao">0%</strong>
         </div>
       </section>
+
 
       <section class="dashboard-section">
         <h3>Checklists por processo</h3>

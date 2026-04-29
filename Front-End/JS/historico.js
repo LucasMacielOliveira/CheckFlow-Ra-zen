@@ -180,11 +180,11 @@ async function carregarHistorico() {
     if (loading) loading.style.display = "flex";
     if (container) container.innerHTML = "";
 
-    // TEMPORÁRIO: busca todo o histórico do banco
-    // Antes estava filtrando pelo usuário logado e podia vir vazio.
-    historicoCache = await buscarHistoricoAPI("");
+    const usuario = obterUsuarioAtual();
 
-    console.log("HISTÓRICO RECEBIDO NO FRONT:", historicoCache);
+    console.log("USUÁRIO USADO NO FILTRO DO HISTÓRICO:", usuario);
+
+    historicoCache = await buscarHistoricoAPI(usuario);
 
     if (!Array.isArray(historicoCache)) {
       historicoCache = [];
@@ -198,7 +198,7 @@ async function carregarHistorico() {
 
     renderizarHistorico();
   } catch (erro) {
-    console.error("Erro detalhado ao carregar histórico:", erro);
+    console.error("Erro ao carregar histórico:", erro);
 
     if (container) {
       container.innerHTML = `

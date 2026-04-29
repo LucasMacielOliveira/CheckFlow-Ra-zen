@@ -15,6 +15,10 @@ const {
   getDashboardSummary
 } = require("./repositorios/dashboard.repository");
 
+const {
+  findUserByUsername
+} = require("./repositorios/auth.repository");
+
 // DADOS FIXOS
 
 const filiaisPorEstado = {
@@ -586,7 +590,8 @@ async function getDashboard(req, res) {
     const filtros = {
       dataInicio: normalizarTexto(req.query.dataInicio),
       dataFim: normalizarTexto(req.query.dataFim),
-      processo: normalizarTexto(req.query.processo)
+      processo: normalizarTexto(req.query.processo),
+      usuario: normalizarTexto(req.query.usuario)
     };
 
     const resumo = await getDashboardSummary(filtros);
@@ -599,6 +604,46 @@ async function getDashboard(req, res) {
       erro: "Erro ao carregar dashboard."
     });
   }
+}
+
+async function login(req, res) {
+
+  
+  try {
+    const usuario = normalizarTexto(req.body.usuario);
+    const senha = normalizarTexto(req.body.senha);
+
+    if (!usuario || !senha) {
+      return res.status(400).json({
+        erro: "Usuário e senha são obrigatórios."
+      });
+    }
+
+    const user = await findUserByUsername(usuario);
+
+    if (!user || user.senha !== senha) {
+      return res.status(401).json({
+        erro: "Usuário ou senha inválidos."
+      });
+    }
+
+    return res.json({
+      id: user.id,
+      nome: user.nome,
+      usuario: user.usuario,
+      perfil: user.perfil,
+      area: user.area
+    });
+  } catch (error) {
+    console.error("Erro ao fazer login:", error);
+
+    return res.status(500).json({
+      erro: "Erro ao fazer login."
+    });
+  }
+  console.log("USUARIO DIGITADO:", usuario);
+console.log("SENHA DIGITADA:", senha);
+console.log("USER DO BANCO:", user);
 }
 
 module.exports = {
@@ -617,5 +662,6 @@ module.exports = {
   postAdminTarefa,
   putAdminTarefa,
   deleteAdminTarefa,
-  getDashboard
+  getDashboard,
+  login
 };

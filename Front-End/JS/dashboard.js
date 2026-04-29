@@ -1,5 +1,36 @@
+document.addEventListener("DOMContentLoaded", () => {
+  if (!exigirLogin()) return;
+
+  iniciarPagina();
+});
+
+function montarQueryDashboard() {
+  const dataInicio = document.getElementById("filtroDataInicio")?.value || "";
+  const dataFim = document.getElementById("filtroDataFim")?.value || "";
+  const processo = document.getElementById("filtroProcesso")?.value || "";
+
+  const perfil = lerTexto("perfilUsuario");
+  const usuario = lerTexto("usuarioLogado");
+
+  const params = new URLSearchParams();
+
+  if (dataInicio) params.append("dataInicio", dataInicio);
+  if (dataFim) params.append("dataFim", dataFim);
+  if (processo) params.append("processo", processo);
+
+  if (perfil !== "admin" && usuario) {
+    params.append("usuario", usuario);
+  }
+
+  const query = params.toString();
+
+  return query ? `?${query}` : "";
+}
+
+
 async function buscarResumoDashboard() {
-  return request("/dashboard/resumo");
+  const query = montarQueryDashboard();
+  return request(`/dashboard/resumo${query}`);
 }
 
 function getElement(id) {
@@ -73,3 +104,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
   carregarDashboard();
 });
+
+function aplicarFiltrosDashboard() {
+  carregarDashboard();
+}
+
+function limparFiltrosDashboard() {
+  const dataInicio = document.getElementById("filtroDataInicio");
+  const dataFim = document.getElementById("filtroDataFim");
+  const processo = document.getElementById("filtroProcesso");
+
+  if (dataInicio) dataInicio.value = "";
+  if (dataFim) dataFim.value = "";
+  if (processo) processo.value = "";
+
+  carregarDashboard();
+}

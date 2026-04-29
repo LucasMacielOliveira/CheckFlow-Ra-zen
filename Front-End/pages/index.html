@@ -1,50 +1,37 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <title>CheckFlow - Login</title>
   <link rel="stylesheet" href="../CSS/style.css">
 </head>
 
-<div id="toastContainer" class="toast-container"></div>
-
 <body>
+  <div id="toastContainer" class="toast-container"></div>
+
   <div class="page">
     <div class="card">
       <div class="logo">
         <img src="../assets/checkflow-logo.png" alt="CheckFlow">
       </div>
+
       <div class="subtitle">Acesso ao sistema</div>
 
       <input class="input" type="text" id="usuario" placeholder="Usuário Corporativo">
       <input class="input" type="password" id="senha" placeholder="Senha">
-      <button class="button" onclick="entrar()">Entrar</button>
 
-       <div class="footer-brand">
-  <img src="../assets/raizen-logo.png" alt="Raízen">
-</div>
+      <button class="button" type="button" onclick="fazerLogin()">
+        Entrar
+      </button>
+
+      <div class="footer-brand">
+        <img src="../assets/raizen-logo.png" alt="Raízen">
+      </div>
     </div>
   </div>
 
   <script src="../JS/storage.js"></script>
-  <script>
-    function entrar() {
-      const usuario = document.getElementById("usuario").value.trim();
-      const senha = document.getElementById("senha").value.trim();
-
-      if (!usuario) {
-        alert("Digite o usuário.");
-        return;
-      }
-
-      if (!senha) {
-        alert("Digite a senha.");
-        return;
-      }
-
-      salvarTexto("usuarioLogado", usuario);
-      window.location.href = "area.html";
-    }
-  </script>
+  <script src="../JS/api.js"></script>
+  <script src="../JS/auth.js"></script>
 </body>
 </html>
