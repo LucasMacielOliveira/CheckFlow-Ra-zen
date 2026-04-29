@@ -1,6 +1,4 @@
 const {
-  lerHistorico,
-  salvarHistorico,
   lerTarefas,
   salvarTarefas,
   lerTarefasPadrao,
@@ -9,7 +7,7 @@ const {
 } = require("./data");
 
 const {
-  saveHistory,  
+  saveHistory,
   findHistory
 } = require("./repositorios/historico.repository");
 
@@ -227,7 +225,10 @@ function validarHistorico(payload) {
 // CONTROLLERS
 
 function healthCheck(req, res) {
-  return res.json({ ok: true, mensagem: "API CheckFlow online." });
+  return res.json({
+    ok: true,
+    mensagem: "API CheckFlow online."
+  });
 }
 
 function getEstados(req, res) {
@@ -296,12 +297,13 @@ function getTarefas(req, res) {
 async function getHistorico(req, res) {
   try {
     const usuario = normalizarTexto(req.query.usuario);
-
+    
     const historico = await findHistory(usuario);
 
     return res.json(historico);
   } catch (error) {
     console.error("Erro ao listar histórico no banco:", error);
+
     return res.status(500).json({
       erro: "Erro ao listar histórico."
     });
@@ -309,9 +311,6 @@ async function getHistorico(req, res) {
 }
 
 async function postHistorico(req, res) {
-    console.log("CHEGOU NO POST /historico");
-    console.log("BODY RECEBIDO:", req.body);
-    
   try {
     const validacao = validarHistorico(req.body || {});
 
@@ -349,19 +348,9 @@ async function postHistorico(req, res) {
 
 function deleteHistoricoPorId(req, res) {
   try {
-    const { id } = req.params;
-
-    const historico = lerHistorico();
-    const novoHistorico = historico.filter(
-      (item) => String(item.id) !== String(id)
-    );
-
-    if (novoHistorico.length === historico.length) {
-      return res.status(404).json({ erro: "Registro não encontrado." });
-    }
-
-    salvarHistorico(novoHistorico);
-    return res.json({ mensagem: "Registro excluído com sucesso." });
+    return res.status(501).json({
+      erro: "Exclusão de histórico no banco ainda não implementada."
+    });
   } catch (error) {
     console.error("Erro ao excluir registro do histórico:", error);
     return res.status(500).json({ erro: "Erro ao excluir registro." });
@@ -370,8 +359,9 @@ function deleteHistoricoPorId(req, res) {
 
 function deleteHistorico(req, res) {
   try {
-    salvarHistorico([]);
-    return res.json({ mensagem: "Histórico limpo com sucesso." });
+    return res.status(501).json({
+      erro: "Limpeza de histórico no banco ainda não implementada."
+    });
   } catch (error) {
     console.error("Erro ao limpar histórico:", error);
     return res.status(500).json({ erro: "Erro ao limpar histórico." });
@@ -469,6 +459,7 @@ function patchSolicitacaoStatus(req, res) {
     };
 
     salvarSolicitacoes(solicitacoes);
+
     return res.json(solicitacoes[index]);
   } catch (error) {
     console.error("Erro ao atualizar status da solicitação:", error);
@@ -509,6 +500,7 @@ function postAdminTarefa(req, res) {
     salvarTarefas(tarefas);
 
     const solicitacaoId = normalizarTexto(req.body?.solicitacaoId);
+
     if (solicitacaoId) {
       const solicitacoes = lerSolicitacoes();
       const indexSolicitacao = solicitacoes.findIndex(
@@ -521,6 +513,7 @@ function postAdminTarefa(req, res) {
           status: "atendida",
           atualizadoEm: new Date().toISOString()
         };
+
         salvarSolicitacoes(solicitacoes);
       }
     }
@@ -558,6 +551,7 @@ function putAdminTarefa(req, res) {
     };
 
     salvarTarefas(tarefas);
+
     return res.json(tarefas[index]);
   } catch (error) {
     console.error("Erro ao atualizar tarefa:", error);
@@ -579,6 +573,7 @@ function deleteAdminTarefa(req, res) {
     }
 
     salvarTarefas(novasTarefas);
+
     return res.json({ mensagem: "Tarefa excluída com sucesso." });
   } catch (error) {
     console.error("Erro ao excluir tarefa:", error);
@@ -588,7 +583,13 @@ function deleteAdminTarefa(req, res) {
 
 async function getDashboard(req, res) {
   try {
-    const resumo = await getDashboardSummary();
+    const filtros = {
+      dataInicio: normalizarTexto(req.query.dataInicio),
+      dataFim: normalizarTexto(req.query.dataFim),
+      processo: normalizarTexto(req.query.processo)
+    };
+
+    const resumo = await getDashboardSummary(filtros);
 
     return res.json(resumo);
   } catch (error) {

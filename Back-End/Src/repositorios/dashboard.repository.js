@@ -1,44 +1,95 @@
 const pool = require("../db");
 
-async function getDashboardSummary() {
-  const totalChecklistsQuery = await pool.query(`
+function montarFiltrosDashboard(filtros = {}) {
+  const condicoes = [];
+  const params = [];
+
+  if (filtros.dataInicio) {
+    params.push(filtros.dataInicio);
+    condicoes.push(`c.finalizado_em::date >= $${params.length}`);
+  }
+
+  if (filtros.dataFim) {
+    params.push(filtros.dataFim);
+    condicoes.push(`c.finalizado_em::date <= $${params.length}`);
+  }
+
+  if (filtros.processo) {
+    params.push(filtros.processo);
+    condicoes.push(`c.processo = $${params.length}`);
+  }
+
+  const where = condicoes.length ? `WHERE ${condicoes.join(" AND ")}` : "";
+
+  return {
+    where,
+    params
+  };
+}
+
+async function getDashboardSummary(filtros = {}) {
+  const { where, params } = montarFiltrosDashboard(filtros);
+
+  const totalChecklistsQuery = await pool.query(
+    `
     SELECT COUNT(*)::int AS total
-    FROM checklists
-  `);
+    FROM checklists c
+    ${where}
+    `,
+    params
+  );
 
-  const porProcessoQuery = await pool.query(`
+  const porProcessoQuery = await pool.query(
+    `
     SELECT 
-      processo,
+      c.processo,
       COUNT(*)::int AS total
-    FROM checklists
-    GROUP BY processo
+    FROM checklists c
+    ${where}
+    GROUP BY c.processo
     ORDER BY total DESC
-  `);
+    `,
+    params
+  );
 
-  const porUsuarioQuery = await pool.query(`
+  const porUsuarioQuery = await pool.query(
+    `
     SELECT 
-      usuario,
+      c.usuario,
       COUNT(*)::int AS total
-    FROM checklists
-    GROUP BY usuario
+    FROM checklists c
+    ${where}
+    GROUP BY c.usuario
     ORDER BY total DESC
-  `);
+    `,
+    params
+  );
 
-  const porMesQuery = await pool.query(`
+  const porMesQuery = await pool.query(
+    `
     SELECT 
-      TO_CHAR(finalizado_em, 'YYYY-MM') AS mes,
+      TO_CHAR(c.finalizado_em, 'YYYY-MM') AS mes,
       COUNT(*)::int AS total
-    FROM checklists
+    FROM checklists c
+    ${where}
     GROUP BY mes
     ORDER BY mes DESC
-  `);
+    `,
+    params
+  );
 
-  const tarefasQuery = await pool.query(`
+  const tarefasQuery = await pool.query(
+    `
     SELECT
-      COUNT(*)::int AS total_tarefas,
-      COUNT(*) FILTER (WHERE concluida = true)::int AS tarefas_concluidas
-    FROM checklist_tarefas
-  `);
+      COUNT(ct.id)::int AS total_tarefas,
+      COUNT(ct.id) FILTER (WHERE ct.concluida = true)::int AS tarefas_concluidas
+    FROM checklists c
+    LEFT JOIN checklist_tarefas ct
+      ON ct.checklist_id = c.id
+    ${where}
+    `,
+    params
+  );
 
   const totalChecklists = totalChecklistsQuery.rows[0]?.total || 0;
   const totalTarefas = tarefasQuery.rows[0]?.total_tarefas || 0;
@@ -49,6 +100,7 @@ async function getDashboardSummary() {
     : 0;
 
   return {
+    filtrosAplicados: filtros,
     totalChecklists,
     totalTarefas,
     tarefasConcluidas,
