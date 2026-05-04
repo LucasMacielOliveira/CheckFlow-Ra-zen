@@ -36,4 +36,12 @@ router.get("/dashboard/resumo", controllers.getDashboard);
 // Auth
 router.post("/login", controllers.login);
 
+// Admin - usuários
+// Usuários / Áreas
+router.get("/areas", controllers.getAreas);
+router.get("/admin/usuarios", controllers.getUsuarios);
+router.post("/admin/usuarios", controllers.postUsuario);
+router.put("/admin/usuarios/:id", controllers.putUsuario);
+router.patch("/admin/usuarios/:id/status", controllers.patchStatusUsuario);
+
 module.exports = router;

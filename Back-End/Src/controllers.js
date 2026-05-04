@@ -19,6 +19,13 @@ const {
   findUserByUsername
 } = require("./repositorios/auth.repository");
 
+const {
+  listarUsuarios,
+  criarUsuario,
+  atualizarUsuario,
+  alterarStatusUsuario,
+  listarAreas
+} = require("./repositorios/usuarios.repository");
 // DADOS FIXOS
 
 const filiaisPorEstado = {
@@ -646,6 +653,126 @@ console.log("SENHA DIGITADA:", senha);
 console.log("USER DO BANCO:", user);
 }
 
+function validarUsuarioAdmin(payload) {
+  const nome = normalizarTexto(payload.nome);
+  const usuario = normalizarTexto(payload.usuario);
+  const senha = normalizarTexto(payload.senha);
+  const perfil = normalizarTexto(payload.perfil) || "analista";
+  const areaId = Number(payload.areaId);
+
+  if (!nome) return { erro: "Nome é obrigatório." };
+  if (!usuario) return { erro: "Usuário é obrigatório." };
+  if (!["admin", "analista"].includes(perfil)) return { erro: "Perfil inválido." };
+  if (!areaId) return { erro: "Área é obrigatória." };
+
+  return { nome, usuario, senha, perfil, areaId };
+}
+
+function validarUsuarioAdmin(payload) {
+  const nome = normalizarTexto(payload.nome);
+  const usuario = normalizarTexto(payload.usuario);
+  const senha = normalizarTexto(payload.senha);
+  const perfil = normalizarTexto(payload.perfil) || "analista";
+  const areaId = Number(payload.areaId);
+
+  if (!nome) return { erro: "Nome é obrigatório." };
+  if (!usuario) return { erro: "Usuário é obrigatório." };
+  if (!["admin", "analista"].includes(perfil)) return { erro: "Perfil inválido." };
+  if (!areaId) return { erro: "Área é obrigatória." };
+
+  return { nome, usuario, senha, perfil, areaId };
+}
+
+async function getUsuarios(req, res) {
+  try {
+    const usuarios = await listarUsuarios();
+    return res.json(usuarios);
+  } catch (error) {
+    console.error("Erro ao listar usuários:", error);
+    return res.status(500).json({ erro: "Erro ao listar usuários." });
+  }
+}
+
+async function postUsuario(req, res) {
+  try {
+    const validacao = validarUsuarioAdmin(req.body || {});
+
+    if (validacao.erro) {
+      return res.status(400).json({ erro: validacao.erro });
+    }
+
+    if (!validacao.senha) {
+      return res.status(400).json({ erro: "Senha é obrigatória." });
+    }
+
+    const novoUsuario = await criarUsuario(validacao);
+    return res.status(201).json(novoUsuario);
+  } catch (error) {
+    console.error("Erro ao criar usuário:", error);
+
+    if (error.code === "23505") {
+      return res.status(409).json({ erro: "Usuário já cadastrado." });
+    }
+
+    return res.status(500).json({ erro: "Erro ao criar usuário." });
+  }
+}
+
+async function putUsuario(req, res) {
+  try {
+    const { id } = req.params;
+    const validacao = validarUsuarioAdmin(req.body || {});
+
+    if (validacao.erro) {
+      return res.status(400).json({ erro: validacao.erro });
+    }
+
+    const usuarioAtualizado = await atualizarUsuario(id, validacao);
+
+    if (!usuarioAtualizado) {
+      return res.status(404).json({ erro: "Usuário não encontrado." });
+    }
+
+    return res.json(usuarioAtualizado);
+  } catch (error) {
+    console.error("Erro ao atualizar usuário:", error);
+
+    if (error.code === "23505") {
+      return res.status(409).json({ erro: "Usuário já cadastrado." });
+    }
+
+    return res.status(500).json({ erro: "Erro ao atualizar usuário." });
+  }
+}
+
+async function patchStatusUsuario(req, res) {
+  try {
+    const { id } = req.params;
+    const ativo = Boolean(req.body?.ativo);
+
+    const usuarioAtualizado = await alterarStatusUsuario(id, ativo);
+
+    if (!usuarioAtualizado) {
+      return res.status(404).json({ erro: "Usuário não encontrado." });
+    }
+
+    return res.json(usuarioAtualizado);
+  } catch (error) {
+    console.error("Erro ao alterar status do usuário:", error);
+    return res.status(500).json({ erro: "Erro ao alterar status do usuário." });
+  }
+}
+
+async function getAreas(req, res) {
+  try {
+    const areas = await listarAreas();
+    return res.json(areas);
+  } catch (error) {
+    console.error("Erro ao listar áreas:", error);
+    return res.status(500).json({ erro: "Erro ao listar áreas." });
+  }
+}
+
 module.exports = {
   healthCheck,
   getEstados,
@@ -663,5 +790,11 @@ module.exports = {
   putAdminTarefa,
   deleteAdminTarefa,
   getDashboard,
-  login
-};
+  login,
+  getUsuarios,
+  postUsuario,
+  putUsuario,
+  getAreas,
+  patchStatusUsuario
+  
+}
