@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>CheckFlow - Usuários</title>
+  <link rel="stylesheet" href="../CSS/style.css">
+</head>
+<body>
+  <div id="toastContainer" class="toast-container"></div>
+
+  <div class="page">
+    <div class="card admin-card">
+      <div class="logo">
+        <img src="../assets/checkflow-logo.png" alt="CheckFlow">
+      </div>
+
+      <div class="history-header">
+        <div class="subtitle no-margin">Administração de Usuários</div>
+        <p class="history-description">
+          Cadastre, edite e controle o acesso dos usuários do CheckFlow.
+        </p>
+      </div>
+
+      <div class="admin-layout">
+        <section class="admin-form-card">
+          <h3 class="selection-title">Cadastro de usuário</h3>
+
+          <input type="hidden" id="usuarioId">
+
+          <label class="admin-label" for="nomeUsuario">Nome</label>
+          <input id="nomeUsuario" class="input" type="text" placeholder="Ex.: Lucas Maciel">
+
+          <label class="admin-label" for="loginUsuario">Usuário</label>
+          <input id="loginUsuario" class="input" type="text" placeholder="Ex.: CS449531">
+
+          <label class="admin-label" for="senhaUsuario">Senha</label>
+          <input id="senhaUsuario" class="input" type="password" placeholder="Informe a senha">
+
+          <label class="admin-label" for="perfilUsuarioForm">Perfil</label>
+          <select id="perfilUsuarioForm" class="input">
+            <option value="analista">Analista</option>
+            <option value="admin">Admin</option>
+          </select>
+
+          <label class="admin-label" for="areaUsuario">Área</label>
+          <select id="areaUsuario" class="input">
+            <option value="">Selecione uma área</option>
+          </select>
+
+          <div class="admin-actions">
+            <button class="button" type="button" onclick="salvarUsuarioAdmin()">
+              Salvar usuário
+            </button>
+
+            <button
+              id="btnCancelarUsuario"
+              class="secondary-button small-button"
+              type="button"
+              style="display: none;"
+              onclick="limparFormularioUsuario()"
+            >
+              Cancelar edição
+            </button>
+          </div>
+        </section>
+
+        <section class="admin-list-card">
+          <div class="admin-list-header">
+            <h3 class="selection-title">Usuários cadastrados</h3>
+
+            <button
+              class="secondary-button small-button"
+              type="button"
+              onclick="carregarUsuariosAdmin()"
+            >
+              Atualizar
+            </button>
+          </div>
+
+          <div id="listaUsuarios" class="history-list">
+            <div class="empty-state">Carregando usuários...</div>
+          </div>
+        </section>
+      </div>
+
+      <div class="button-row actions-inline">
+        <button class="secondary-button small-button" type="button" onclick="voltarAdmin()">
+          Voltar
+        </button>
+      </div>
+
+      <div class="footer-brand">
+        <img src="../assets/raizen-logo.png" alt="Raízen">
+      </div>
+    </div>
+  </div>
+
+  <script src="../JS/storage.js"></script>
+  <script src="../JS/auth.js"></script>
+  <script src="../JS/api.js"></script>
+  <script src="../JS/admin-usuarios.js"></script>
+</body>
+</html>

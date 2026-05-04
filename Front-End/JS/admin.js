@@ -1,3 +1,7 @@
+if (localStorage.getItem("perfilUsuario") !== "admin") {
+  window.location.href = "processo.html";
+}
+
 let tarefasAdminCache = [];
 let solicitacoesCache = [];
 let tarefaEmEdicaoId = null;
