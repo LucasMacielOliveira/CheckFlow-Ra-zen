@@ -38,6 +38,9 @@ const filiaisPorEstado = {
   "Sergipe": ["Aracaju"]
 };
 
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+
 const estadosDisponiveis = Object.keys(filiaisPorEstado);
 
 // HELPERS
@@ -592,30 +595,7 @@ function deleteAdminTarefa(req, res) {
   }
 }
 
-async function getDashboard(req, res) {
-  try {
-    const filtros = {
-      dataInicio: normalizarTexto(req.query.dataInicio),
-      dataFim: normalizarTexto(req.query.dataFim),
-      processo: normalizarTexto(req.query.processo),
-      usuario: normalizarTexto(req.query.usuario)
-    };
-
-    const resumo = await getDashboardSummary(filtros);
-
-    return res.json(resumo);
-  } catch (error) {
-    console.error("Erro ao carregar dashboard:", error);
-
-    return res.status(500).json({
-      erro: "Erro ao carregar dashboard."
-    });
-  }
-}
-
 async function login(req, res) {
-
-  
   try {
     const usuario = normalizarTexto(req.body.usuario);
     const senha = normalizarTexto(req.body.senha);
@@ -628,18 +608,43 @@ async function login(req, res) {
 
     const user = await findUserByUsername(usuario);
 
-    if (!user || user.senha !== senha) {
+    if (!user || !user.ativo) {
       return res.status(401).json({
         erro: "Usuário ou senha inválidos."
       });
     }
 
+    const senhaValida = await bcrypt.compare(senha, user.senha);
+
+    if (!senhaValida) {
+      return res.status(401).json({
+        erro: "Usuário ou senha inválidos."
+      });
+    }
+
+    const token = jwt.sign(
+      {
+        id: user.id,
+        nome: user.nome,
+        usuario: user.usuario,
+        perfil: user.perfil,
+        area: user.area
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: process.env.JWT_EXPIRES_IN || "8h"
+      }
+    );
+
     return res.json({
-      id: user.id,
-      nome: user.nome,
-      usuario: user.usuario,
-      perfil: user.perfil,
-      area: user.area
+      token,
+      usuario: {
+        id: user.id,
+        nome: user.nome,
+        usuario: user.usuario,
+        perfil: user.perfil,
+        area: user.area
+      }
     });
   } catch (error) {
     console.error("Erro ao fazer login:", error);
@@ -648,9 +653,6 @@ async function login(req, res) {
       erro: "Erro ao fazer login."
     });
   }
-  console.log("USUARIO DIGITADO:", usuario);
-console.log("SENHA DIGITADA:", senha);
-console.log("USER DO BANCO:", user);
 }
 
 function validarUsuarioAdmin(payload) {
@@ -704,6 +706,8 @@ async function postUsuario(req, res) {
     if (!validacao.senha) {
       return res.status(400).json({ erro: "Senha é obrigatória." });
     }
+
+    validacao.senha = await bcrypt.hash(validacao.senha, 10);
 
     const novoUsuario = await criarUsuario(validacao);
     return res.status(201).json(novoUsuario);
