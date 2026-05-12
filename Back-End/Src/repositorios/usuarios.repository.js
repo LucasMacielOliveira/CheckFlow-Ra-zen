@@ -33,6 +33,24 @@ async function criarUsuario(dados) {
 }
 
 async function atualizarUsuario(id, dados) {
+  if (dados.senha) {
+    const result = await pool.query(
+      `
+      UPDATE usuarios
+      SET nome = $1,
+          usuario = $2,
+          senha = $3,
+          perfil = $4,
+          area_id = $5
+      WHERE id = $6
+      RETURNING id, nome, usuario, perfil, ativo, area_id AS "areaId"
+      `,
+      [dados.nome, dados.usuario, dados.senha, dados.perfil, dados.areaId, id]
+    );
+
+    return result.rows[0] || null;
+  }
+
   const result = await pool.query(
     `
     UPDATE usuarios

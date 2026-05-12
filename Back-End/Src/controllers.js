@@ -608,19 +608,26 @@ async function login(req, res) {
 
     const user = await findUserByUsername(usuario);
 
-    if (!user || !user.ativo) {
-      return res.status(401).json({
-        erro: "Usuário ou senha inválidos."
-      });
-    }
+console.log("USUARIO DIGITADO:", usuario);
+console.log("SENHA DIGITADA:", senha);
+console.log("USER ENCONTRADO:", user);
+console.log("SENHA DO BANCO:", user?.senha);
+console.log("USUARIO ATIVO:", user?.ativo);
 
-    const senhaValida = await bcrypt.compare(senha, user.senha);
+if (!user || !user.ativo) {
+  return res.status(401).json({
+    erro: "Usuário ou senha inválidos."
+  });
+}
 
-    if (!senhaValida) {
-      return res.status(401).json({
-        erro: "Usuário ou senha inválidos."
-      });
-    }
+const senhaValida = await bcrypt.compare(senha, user.senha);
+console.log("SENHA VALIDA?", senhaValida);
+
+if (!senhaValida) {
+  return res.status(401).json({
+    erro: "Usuário ou senha inválidos."
+  });
+}
 
     const token = jwt.sign(
       {
@@ -731,6 +738,10 @@ async function putUsuario(req, res) {
       return res.status(400).json({ erro: validacao.erro });
     }
 
+    if (validacao.senha) {
+      validacao.senha = await bcrypt.hash(validacao.senha, 10);
+    }
+
     const usuarioAtualizado = await atualizarUsuario(id, validacao);
 
     if (!usuarioAtualizado) {
@@ -774,6 +785,27 @@ async function getAreas(req, res) {
   } catch (error) {
     console.error("Erro ao listar áreas:", error);
     return res.status(500).json({ erro: "Erro ao listar áreas." });
+  }
+}
+
+async function getDashboard(req, res) {
+  try {
+    const filtros = {
+      dataInicio: normalizarTexto(req.query.dataInicio),
+      dataFim: normalizarTexto(req.query.dataFim),
+      processo: normalizarTexto(req.query.processo),
+      usuario: normalizarTexto(req.query.usuario)
+    };
+
+    const resumo = await getDashboardSummary(filtros);
+
+    return res.json(resumo);
+  } catch (error) {
+    console.error("Erro ao carregar dashboard:", error);
+
+    return res.status(500).json({
+      erro: "Erro ao carregar dashboard."
+    });
   }
 }
 

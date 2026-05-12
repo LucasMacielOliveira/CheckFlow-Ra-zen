@@ -3,13 +3,16 @@ const API_BASE_URL = window.CHECKFLOW_API_URL || "http://localhost:3000";
 async function request(endpoint, options = {}) {
   const url = `${API_BASE_URL}${endpoint}`;
 
-  const response = await fetch(url, {
-    headers: {
-      "Content-Type": "application/json",
-      ...(options.headers || {})
-    },
-    ...options
-  });
+const token = localStorage.getItem("token");
+
+const response = await fetch(url, {
+  headers: {
+    "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...(options.headers || {})
+  },
+  ...options
+});
 
   if (!response.ok) {
     let mensagem = "Erro na requisição";

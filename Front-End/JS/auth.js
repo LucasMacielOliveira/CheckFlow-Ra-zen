@@ -61,7 +61,7 @@ async function fazerLogin() {
   }
 
   try {
-    const usuarioAutenticado = await request("/login", {
+    const resposta = await request("/login", {
       method: "POST",
       body: JSON.stringify({
         usuario,
@@ -69,11 +69,12 @@ async function fazerLogin() {
       })
     });
 
-    salvarTexto("usuarioLogado", usuarioAutenticado.nome);
-    salvarTexto("usuarioSistema", usuarioAutenticado.usuario);
-    salvarTexto("perfilUsuario", usuarioAutenticado.perfil);
-    salvarTexto("areaSelecionada", usuarioAutenticado.area);
-    salvarTexto("usuarioId", usuarioAutenticado.id);
+    salvarTexto("token", resposta.token);
+    salvarTexto("usuarioLogado", resposta.usuario.nome);
+    salvarTexto("usuarioSistema", resposta.usuario.usuario);
+    salvarTexto("perfilUsuario", resposta.usuario.perfil);
+    salvarTexto("areaSelecionada", resposta.usuario.area);
+    salvarTexto("usuarioId", resposta.usuario.id);
 
     window.location.href = "area.html";
   } catch (erro) {
