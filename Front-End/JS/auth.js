@@ -69,7 +69,7 @@ async function fazerLogin() {
       })
     });
 
-    salvarTexto("token", resposta.token);
+    localStorage.setItem("token", resposta.token);
     salvarTexto("usuarioLogado", resposta.usuario.nome);
     salvarTexto("usuarioSistema", resposta.usuario.usuario);
     salvarTexto("perfilUsuario", resposta.usuario.perfil);
@@ -80,6 +80,11 @@ async function fazerLogin() {
   } catch (erro) {
     alert(erro?.message || "Erro ao fazer login.");
   }
+}
+
+function logout() {
+  localStorage.clear();
+  window.location.href = "index.html";
 }
 
 function salvarUsuarioLogado(usuario) {
