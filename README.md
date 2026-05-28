@@ -48,7 +48,7 @@ PostgreSQL
 
 🔹 Segurança - 
 JWT - 
-bcrypt - 
+bcrypt 
 
 🔹 Versionamento
 Git - 
