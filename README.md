@@ -35,24 +35,20 @@ O projeto foi idealizado para auxiliar equipes operacionais e administrativas na
 # 🛠️ Tecnologias Utilizadas
 
 🔹 Front-End
-    HTML5
-    CSS3
-    JavaScript Vanilla
-
+ HTML5
+ CSS3
+JavaScript Vanilla
 🔹 Back-End
-    Node.js
-    Express.js
-
+Node.js
+Express.js
 🔹 Banco de Dados
-    PostgreSQL
-
+PostgreSQL
 🔹 Segurança
-    JWT
-    bcrypt
-
+JWT
+bcrypt
 🔹 Versionamento
-    Git
-    GitHub
+ Git
+GitHub
 
 ---
 
