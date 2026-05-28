@@ -2,9 +2,9 @@ const express = require("express");
 const controllers = require("./controllers");
 
 const {
-  autenticarToken,
+  autenticar,
   exigirAdmin
-} = require("./Middlewares/auth.middlewares");
+} = require("./middlewares/auth.middleware");
 
 const router = express.Router();
 
@@ -15,31 +15,31 @@ router.get("/", controllers.healthCheck);
 router.post("/login", controllers.login);
 
 // Rotas protegidas
-router.get("/estados", autenticarToken, controllers.getEstados);
-router.get("/filiais", autenticarToken, controllers.getFiliais);
+router.get("/estados", autenticar, controllers.getEstados);
+router.get("/filiais", autenticar, controllers.getFiliais);
 
-router.get("/tarefas", autenticarToken, controllers.getTarefas);
+router.get("/tarefas", autenticar, controllers.getTarefas);
 
-router.get("/historico", autenticarToken, controllers.getHistorico);
-router.post("/historico", autenticarToken, controllers.postHistorico);
-router.delete("/historico/:id", autenticarToken, exigirAdmin, controllers.deleteHistoricoPorId);
-router.delete("/historico", autenticarToken, exigirAdmin, controllers.deleteHistorico);
+router.get("/historico", autenticar, controllers.getHistorico);
+router.post("/historico", autenticar, controllers.postHistorico);
+router.delete("/historico/:id", autenticar, exigirAdmin, controllers.deleteHistoricoPorId);
+router.delete("/historico", autenticar, exigirAdmin, controllers.deleteHistorico);
 
-router.get("/solicitacoes", autenticarToken, controllers.getSolicitacoes);
-router.post("/solicitacoes", autenticarToken, controllers.postSolicitacao);
-router.patch("/solicitacoes/:id/status", autenticarToken, exigirAdmin, controllers.patchSolicitacaoStatus);
+router.get("/solicitacoes", autenticar, controllers.getSolicitacoes);
+router.post("/solicitacoes", autenticar, controllers.postSolicitacao);
+router.patch("/solicitacoes/:id/status", autenticar, exigirAdmin, controllers.patchSolicitacaoStatus);
 
-router.get("/admin/tarefas", autenticarToken, exigirAdmin, controllers.getAdminTarefas);
-router.post("/admin/tarefas", autenticarToken, exigirAdmin, controllers.postAdminTarefa);
-router.put("/admin/tarefas/:id", autenticarToken, exigirAdmin, controllers.putAdminTarefa);
-router.delete("/admin/tarefas/:id", autenticarToken, exigirAdmin, controllers.deleteAdminTarefa);
+router.get("/admin/tarefas", autenticar, exigirAdmin, controllers.getAdminTarefas);
+router.post("/admin/tarefas", autenticar, exigirAdmin, controllers.postAdminTarefa);
+router.put("/admin/tarefas/:id", autenticar, exigirAdmin, controllers.putAdminTarefa);
+router.delete("/admin/tarefas/:id", autenticar, exigirAdmin, controllers.deleteAdminTarefa);
 
-router.get("/dashboard/resumo", autenticarToken, controllers.getDashboard);
+router.get("/dashboard/resumo", autenticar, controllers.getDashboard);
 
-router.get("/areas", autenticarToken, controllers.getAreas);
-router.get("/admin/usuarios", autenticarToken, exigirAdmin, controllers.getUsuarios);
-router.post("/admin/usuarios", autenticarToken, exigirAdmin, controllers.postUsuario);
-router.put("/admin/usuarios/:id", autenticarToken, exigirAdmin, controllers.putUsuario);
-router.patch("/admin/usuarios/:id/status", autenticarToken, exigirAdmin, controllers.patchStatusUsuario);
+router.get("/areas", autenticar, controllers.getAreas);
+router.get("/admin/usuarios", autenticar, exigirAdmin, controllers.getUsuarios);
+router.post("/admin/usuarios", autenticar, exigirAdmin, controllers.postUsuario);
+router.put("/admin/usuarios/:id", autenticar, exigirAdmin, controllers.putUsuario);
+router.patch("/admin/usuarios/:id/status", autenticar, exigirAdmin, controllers.patchStatusUsuario);
 
 module.exports = router;

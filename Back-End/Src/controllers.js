@@ -608,26 +608,25 @@ async function login(req, res) {
 
     const user = await findUserByUsername(usuario);
 
-console.log("USUARIO DIGITADO:", usuario);
-console.log("SENHA DIGITADA:", senha);
-console.log("USER ENCONTRADO:", user);
-console.log("SENHA DO BANCO:", user?.senha);
-console.log("USUARIO ATIVO:", user?.ativo);
+    if (!user) {
+      return res.status(401).json({
+        erro: "Usuário ou senha inválidos."
+      });
+    }
 
-if (!user || !user.ativo) {
-  return res.status(401).json({
-    erro: "Usuário ou senha inválidos."
-  });
-}
+    if (!user.ativo) {
+      return res.status(403).json({
+        erro: "Usuário inativo. Entre em contato com o administrador."
+      });
+    }
 
-const senhaValida = await bcrypt.compare(senha, user.senha);
-console.log("SENHA VALIDA?", senhaValida);
+    const senhaValida = await bcrypt.compare(senha, user.senha);
 
-if (!senhaValida) {
-  return res.status(401).json({
-    erro: "Usuário ou senha inválidos."
-  });
-}
+    if (!senhaValida) {
+      return res.status(401).json({
+        erro: "Usuário ou senha inválidos."
+      });
+    }
 
     const token = jwt.sign(
       {
@@ -635,11 +634,12 @@ if (!senhaValida) {
         nome: user.nome,
         usuario: user.usuario,
         perfil: user.perfil,
+        areaId: user.areaId,
         area: user.area
       },
       process.env.JWT_SECRET,
       {
-        expiresIn: process.env.JWT_EXPIRES_IN || "8h"
+        expiresIn: "8h"
       }
     );
 
@@ -650,6 +650,7 @@ if (!senhaValida) {
         nome: user.nome,
         usuario: user.usuario,
         perfil: user.perfil,
+        areaId: user.areaId,
         area: user.area
       }
     });
@@ -707,25 +708,37 @@ async function postUsuario(req, res) {
     const validacao = validarUsuarioAdmin(req.body || {});
 
     if (validacao.erro) {
-      return res.status(400).json({ erro: validacao.erro });
+      return res.status(400).json({
+        erro: validacao.erro
+      });
     }
 
     if (!validacao.senha) {
-      return res.status(400).json({ erro: "Senha é obrigatória." });
+      return res.status(400).json({
+        erro: "Senha é obrigatória."
+      });
     }
 
-    validacao.senha = await bcrypt.hash(validacao.senha, 10);
+    const senhaHash = await bcrypt.hash(validacao.senha, 10);
 
-    const novoUsuario = await criarUsuario(validacao);
+    const novoUsuario = await criarUsuario({
+      ...validacao,
+      senha: senhaHash
+    });
+
     return res.status(201).json(novoUsuario);
   } catch (error) {
     console.error("Erro ao criar usuário:", error);
 
     if (error.code === "23505") {
-      return res.status(409).json({ erro: "Usuário já cadastrado." });
+      return res.status(409).json({
+        erro: "Usuário já cadastrado."
+      });
     }
 
-    return res.status(500).json({ erro: "Erro ao criar usuário." });
+    return res.status(500).json({
+      erro: "Erro ao criar usuário."
+    });
   }
 }
 
