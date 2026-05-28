@@ -46,6 +46,7 @@ router.post("/admin/usuarios", autenticar, exigirAdmin, controllers.postUsuario)
 router.put("/admin/usuarios/:id", autenticar, exigirAdmin, controllers.putUsuario);
 router.patch("/admin/usuarios/:id/status", autenticar, exigirAdmin, controllers.patchStatusUsuario);
 
+router.get("/admin/auditoria", autenticar, exigirAdmin, controllers.getAuditoria);
 router.get("/admin/tarefas", autenticar, exigirAdmin, controllers.getAdminTarefas);
 router.post("/admin/tarefas", autenticar, exigirAdmin, controllers.postAdminTarefa);
 router.put("/admin/tarefas/:id", autenticar, exigirAdmin, controllers.putAdminTarefa);

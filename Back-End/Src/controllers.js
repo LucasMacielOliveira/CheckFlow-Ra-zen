@@ -26,6 +26,13 @@ const {
   alterarStatusUsuario,
   listarAreas
 } = require("./repositorios/usuarios.repository");
+
+const { 
+  registrarAuditoria,
+  listarAuditoria 
+} = require("./repositorios/auditoria.repository")
+
+
 // DADOS FIXOS
 
 const filiaisPorEstado = {
@@ -346,6 +353,14 @@ async function postHistorico(req, res) {
 
     const checklistSalvo = await saveHistory(registro);
 
+     await registrarAuditoria({
+      usuarioId: req.usuario?.id,
+      usuarioNome: req.usuario?.nome,
+      acao: "FINALIZOU_CHECKLIST",
+      entidade: "CHECKLIST",
+      detalhes: `Processo ${registro.processo} - Competência ${registro.competencia}`
+    });
+
     return res.status(201).json({
       id: checklistSalvo.id,
       processo: checklistSalvo.processo,
@@ -354,6 +369,7 @@ async function postHistorico(req, res) {
       status: checklistSalvo.status,
       finalizadoEmIso: checklistSalvo.finalizado_em
     });
+
   } catch (error) {
     console.error("Erro ao salvar histórico no banco:", error);
     return res.status(500).json({ erro: "Erro ao salvar histórico." });
@@ -643,6 +659,15 @@ async function login(req, res) {
       }
     );
 
+    await registrarAuditoria({
+  usuarioId: user.id,
+  usuarioNome: user.nome,
+  acao: "LOGIN",
+  entidade: "AUTH",
+  detalhes: `Usuário ${user.usuario} realizou login`
+
+});
+
     return res.json({
       token,
       usuario: {
@@ -654,6 +679,7 @@ async function login(req, res) {
         area: user.area
       }
     });
+
   } catch (error) {
     console.error("Erro ao fazer login:", error);
 
@@ -726,6 +752,14 @@ async function postUsuario(req, res) {
       senha: senhaHash
     });
 
+  await registrarAuditoria({
+      usuarioId: req.usuario?.id,
+      usuarioNome: req.usuario?.nome,
+      acao: "CRIAR_USUARIO",
+      entidade: "ADMIN_USUARIOS",
+      detalhes: `Usuário criado: ${validacao.usuario} | Perfil: ${validacao.perfil}`
+    });
+
     return res.status(201).json(novoUsuario);
   } catch (error) {
     console.error("Erro ao criar usuário:", error);
@@ -784,6 +818,14 @@ async function patchStatusUsuario(req, res) {
       return res.status(404).json({ erro: "Usuário não encontrado." });
     }
 
+    await registrarAuditoria({
+      usuarioId: req.usuario?.id,
+      usuarioNome: req.usuario?.nome,
+      acao: ativo ? "ATIVAR_USUARIO" : "DESATIVAR_USUARIO",
+      entidade: "ADMIN_USUARIOS",
+      detalhes: `Usuário ${usuarioAtualizado.usuario} foi ${ativo ? "ativado" : "desativado"}`
+    });
+
     return res.json(usuarioAtualizado);
   } catch (error) {
     console.error("Erro ao alterar status do usuário:", error);
@@ -822,6 +864,20 @@ async function getDashboard(req, res) {
   }
 }
 
+async function getAuditoria(req, res) {
+  try {
+    const logs = await listarAuditoria();
+
+    return res.json(logs);
+  } catch (error) {
+    console.error("Erro ao carregar auditoria:", error);
+
+    return res.status(500).json({
+      erro: "Erro ao carregar auditoria."
+    });
+  }
+}
+
 module.exports = {
   healthCheck,
   getEstados,
@@ -844,6 +900,7 @@ module.exports = {
   postUsuario,
   putUsuario,
   getAreas,
-  patchStatusUsuario
+  patchStatusUsuario,
+  getAuditoria
   
 }
