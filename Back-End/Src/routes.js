@@ -27,7 +27,7 @@ router.get("/tarefas", autenticar, controllers.getTarefas);
 router.get("/historico", autenticar, controllers.getHistorico);
 router.post("/historico", autenticar, controllers.postHistorico);
 router.delete("/historico/:id", autenticar, controllers.deleteHistoricoPorId);
-router.delete("/historico", autenticar, controllers.deleteHistorico);
+router.delete("/historico", autenticar, exigirAdmin, controllers.deleteHistorico);
 
 router.get("/solicitacoes", autenticar, controllers.getSolicitacoes);
 router.post("/solicitacoes", autenticar, controllers.postSolicitacao);

@@ -132,7 +132,32 @@ async function findHistory(usuario = "") {
 
   return result.rows;
 }
+
+async function deleteHistoryById(id) {
+  const result = await pool.query(
+    `
+    DELETE FROM checklists
+    WHERE id = $1
+    RETURNING id, processo, competencia, usuario
+    `,
+    [id]
+  );
+
+  return result.rows[0] || null;
+}
+
+async function deleteAllHistory() {
+  const result = await pool.query(`
+    DELETE FROM checklists
+    RETURNING id
+  `);
+
+  return result.rowCount;
+}
+
 module.exports = {
   saveHistory,
-  findHistory
+  findHistory,
+  deleteHistoryById,
+  deleteAllHistory
 };

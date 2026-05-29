@@ -8,7 +8,9 @@ const {
 
 const {
   saveHistory,
-  findHistory
+  findHistory,
+  deleteHistoryById,
+  deleteAllHistory
 } = require("./repositorios/historico.repository");
 
 const {
@@ -376,25 +378,60 @@ async function postHistorico(req, res) {
   }
 }
 
-function deleteHistoricoPorId(req, res) {
+async function deleteHistoricoPorId(req, res) {
   try {
-    return res.status(501).json({
-      erro: "Exclusão de histórico no banco ainda não implementada."
+    const { id } = req.params;
+
+    const registroExcluido = await deleteHistoryById(id);
+
+    if (!registroExcluido) {
+      return res.status(404).json({
+        erro: "Registro não encontrado."
+      });
+    }
+
+    await registrarAuditoria({
+      usuarioId: req.usuario?.id,
+      usuarioNome: req.usuario?.nome,
+      acao: "EXCLUIR_HISTORICO",
+      entidade: "HISTORICO",
+      detalhes: `Registro excluído: ID ${registroExcluido.id} | Processo ${registroExcluido.processo} | Competência ${registroExcluido.competencia}`
+    });
+
+    return res.json({
+      mensagem: "Registro excluído com sucesso."
     });
   } catch (error) {
     console.error("Erro ao excluir registro do histórico:", error);
-    return res.status(500).json({ erro: "Erro ao excluir registro." });
+
+    return res.status(500).json({
+      erro: "Erro ao excluir registro."
+    });
   }
 }
 
-function deleteHistorico(req, res) {
+async function deleteHistorico(req, res) {
   try {
-    return res.status(501).json({
-      erro: "Limpeza de histórico no banco ainda não implementada."
+    const totalExcluido = await deleteAllHistory();
+
+    await registrarAuditoria({
+      usuarioId: req.usuario?.id,
+      usuarioNome: req.usuario?.nome,
+      acao: "LIMPAR_HISTORICO",
+      entidade: "HISTORICO",
+      detalhes: `Histórico limpo. Total de registros excluídos: ${totalExcluido}`
+    });
+
+    return res.json({
+      mensagem: "Histórico limpo com sucesso.",
+      totalExcluido
     });
   } catch (error) {
     console.error("Erro ao limpar histórico:", error);
-    return res.status(500).json({ erro: "Erro ao limpar histórico." });
+
+    return res.status(500).json({
+      erro: "Erro ao limpar histórico."
+    });
   }
 }
 
