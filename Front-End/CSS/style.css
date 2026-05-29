@@ -1,26 +1,28 @@
 :root {
-  --primary: #6c7f2a;
-  --primary-dark: #5a6a23;
-  --primary-light: #879e36;
 
-  --text-main: #4f5f1f;
-  --text-dark: #37410f;
-  --text-muted: #4d4d4d;
+  /* VERDE RAÍZEN */
+  --primary: #005859;
+  --primary-dark: #00494a;
+  --primary-light: #0f7475;
 
-  --bg-page: #f4f5ee;
+  --text-main: #005859;
+  --text-dark: #003d3e;
+  --text-muted: #5f6b6b;
+
+  --bg-page: #f4f7f7;
   --bg-card: #ffffff;
-  --bg-soft: #f8faef;
-  --bg-highlight: #eef3db;
+  --bg-soft: #f0f8f8;
+  --bg-highlight: #dff1f1;
 
-  --border-light: #cfd6b2;
-  --border-soft: #dbe3c0;
+  --border-light: #b9d4d4;
+  --border-soft: #d6e7e7;
 
   --success: #2e7d32;
   --danger: #c62828;
   --danger-dark: #a91f1f;
   --warning: #9a6a00;
 
-  --shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+  --shadow: 0 12px 30px rgba(0, 88, 89, 0.10);
 
   --radius-card: 24px;
   --radius-md: 16px;
