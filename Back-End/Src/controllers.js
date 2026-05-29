@@ -866,7 +866,14 @@ async function getDashboard(req, res) {
 
 async function getAuditoria(req, res) {
   try {
-    const logs = await listarAuditoria();
+    const filtros = {
+      usuario: normalizarTexto(req.query.usuario),
+      acao: normalizarTexto(req.query.acao),
+      dataInicio: normalizarTexto(req.query.dataInicio),
+      dataFim: normalizarTexto(req.query.dataFim)
+    };
+
+    const logs = await listarAuditoria(filtros);
 
     return res.json(logs);
   } catch (error) {
@@ -877,6 +884,7 @@ async function getAuditoria(req, res) {
     });
   }
 }
+
 
 module.exports = {
   healthCheck,

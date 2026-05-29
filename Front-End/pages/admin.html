@@ -105,9 +105,12 @@
           </div>
         </section>
 
-        <button class="secondary-button small-button" type="button" onclick="irParaAdminUsuarios()">
-          Gerenciar usuários
-      </button>
+       <button
+          class="secondary-button small-button"
+          type="button"
+            onclick="window.location.href='admin-usuarios.html'">
+              Gerenciar usuários
+        </button>
 
         <section class="admin-list-card">
           <div class="admin-list-header">
@@ -120,7 +123,15 @@
             >
               Atualizar
             </button>
-          </div>
+
+            <button
+              class="secondary-button small-button"
+              type="button"
+              onclick="window.location.href='admin-auditoria.html'">
+                Ver auditoria
+          </button>
+          
+        </div>
 
           <div class="admin-filters">
             <select id="filtroProcesso" class="input">

@@ -14,6 +14,8 @@ function escaparHtml(texto) {
     .replaceAll("'", "&#039;");
 }
 
+
+
 async function buscarAreasAdmin() {
   return request("/areas");
 }

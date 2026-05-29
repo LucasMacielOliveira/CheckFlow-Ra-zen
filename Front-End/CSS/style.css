@@ -1259,3 +1259,33 @@ button:disabled {
     grid-template-columns: 1fr;
   }
 }
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+}
+
+.table th,
+.table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border-soft);
+  text-align: left;
+  color: var(--text-dark);
+  font-size: 14px;
+  vertical-align: top;
+}
+
+.table th {
+  color: var(--text-main);
+  background: var(--bg-soft);
+  font-weight: bold;
+}
+
+.table tr:hover td {
+  background: #fafbf4;
+}
